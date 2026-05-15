@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台股資金流向儀表板</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: '微軟正黑體', 'PingFang TC', sans-serif; background: #0d1117; color: #e6edf3; font-size: 14px; }
+
+  header {
+    background: #161b22; border-bottom: 1px solid #30363d;
+    padding: 12px 20px; display: flex; align-items: center; gap: 16px;
+  }
+  header h1 { font-size: 18px; color: #58a6ff; }
+  .last-update { font-size: 12px; color: #8b949e; margin-left: auto; }
+  .refresh-btn {
+    background: #21262d; border: 1px solid #30363d; color: #58a6ff;
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px;
+  }
+  .refresh-btn:hover { background: #30363d; }
+
+  .layout { display: grid; grid-template-columns: 1fr 380px; height: calc(100vh - 52px); }
+
+  /* ── 左側 ── */
+  .left { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+  .card {
+    background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 16px;
+  }
+  .card-title { font-size: 14px; font-weight: 600; color: #58a6ff; margin-bottom: 12px; }
+
+  /* 市場脈動 */
+  .pulse-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .news-list { list-style: none; }
+  .news-list li { padding: 5px 0; border-bottom: 1px solid #21262d; }
+  .news-list li a { color: #c9d1d9; text-decoration: none; font-size: 13px; }
+  .news-list li a:hover { color: #58a6ff; }
+  .news-source { font-size: 11px; color: #8b949e; }
+  .ai-box {
+    background: #0d2137; border: 1px solid #1f4068; border-radius: 8px;
+    padding: 12px; font-size: 13px; line-height: 1.7; white-space: pre-wrap;
+    color: #c9d1d9; margin-top: 10px;
+  }
+
+  /* 類股熱力圖 */
+  .sector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
+  }
+  .sector-tile {
+    border-radius: 8px; padding: 10px 8px; text-align: center; cursor: pointer;
+    transition: transform .15s; border: 1px solid transparent;
+  }
+  .sector-tile:hover { transform: scale(1.04); border-color: #58a6ff; }
+  .sector-name { font-size: 12px; font-weight: 600; }
+  .sector-pct  { font-size: 18px; font-weight: 700; margin: 4px 0; }
+  .sector-idx  { font-size: 11px; color: #8b949e; }
+
+  /* 成交量 TOP */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #21262d; padding: 8px 10px; text-align: right; color: #8b949e; font-weight: 500; }
+  th:first-child, td:first-child { text-align: left; }
+  td { padding: 7px 10px; border-bottom: 1px solid #21262d; }
+  tr:hover td { background: #1c2128; cursor: pointer; }
+  .up   { color: #f85149; }
+  .down { color: #3fb950; }
+  .flat { color: #8b949e; }
+
+  /* 三大法人 */
+  .inst-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #21262d; }
+  .inst-name { width: 90px; color: #c9d1d9; }
+  .inst-bar-wrap { flex: 1; height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; }
+  .inst-bar { height: 100%; border-radius: 4px; }
+  .inst-net { width: 100px; text-align: right; font-weight: 600; font-size: 13px; }
+
+  /* ── 右側個股詳情 ── */
+  .right {
+    background: #161b22; border-left: 1px solid #30363d;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .right-header { padding: 14px 16px; border-bottom: 1px solid #30363d; }
+  .stock-title { font-size: 20px; font-weight: 700; color: #e6edf3; }
+  .stock-code  { font-size: 13px; color: #8b949e; }
+  .price-row   { display: flex; align-items: baseline; gap: 10px; margin-top: 6px; }
+  .price-big   { font-size: 28px; font-weight: 700; }
+  .price-chg   { font-size: 16px; font-weight: 600; }
+  .price-meta  { font-size: 12px; color: #8b949e; }
+
+  .right-body  { flex: 1; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
+  .section-label { font-size: 12px; color: #8b949e; font-weight: 600; letter-spacing: .05em; margin-bottom: 6px; }
+
+  .news-item { padding: 8px 0; border-bottom: 1px solid #21262d; }
+  .news-item a { color: #c9d1d9; text-decoration: none; font-size: 13px; line-height: 1.4; }
+  .news-item a:hover { color: #58a6ff; }
+  .news-item .snip { font-size: 12px; color: #8b949e; margin-top: 3px; line-height: 1.4; }
+
+  .analysis-box {
+    background: #0d2137; border: 1px solid #1f4068; border-radius: 8px;
+    padding: 12px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; color: #c9d1d9;
+  }
+  .analyze-btn {
+    background: #1f4068; border: 1px solid #388bfd; color: #58a6ff;
+    padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 13px; width: 100%;
+  }
+  .analyze-btn:hover { background: #2d5a9e; }
+
+  .placeholder { color: #8b949e; font-size: 14px; text-align: center; padding: 60px 20px; }
+
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #30363d; border-top-color: #58a6ff; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .badge-en { background: #1a3a5c; color: #79c0ff; font-size: 10px; padding: 1px 5px; border-radius: 3px; margin-left: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📊 台股資金流向儀表板</h1>
+  <span id="last-update" class="last-update">—</span>
+  <button class="refresh-btn" onclick="refreshAll()">↻ 重新整理</button>
+</header>
+
+<div class="layout">
+  <!-- 左側 -->
+  <div class="left">
+
+    <!-- 市場脈動 -->
+    <div class="card">
+      <div class="card-title">🌐 市場脈動（AI 時事分析）</div>
+      <div class="pulse-grid">
+        <div>
+          <div class="section-label">台灣財經新聞</div>
+          <ul class="news-list" id="tw-news"><li><span class="spinner"></span></li></ul>
+        </div>
+        <div>
+          <div class="section-label">國際 / 美股新聞</div>
+          <ul class="news-list" id="us-news"><li><span class="spinner"></span></li></ul>
+        </div>
+      </div>
+      <div class="ai-box" id="pulse-analysis"><span class="spinner"></span> AI 分析載入中...</div>
+    </div>
+
+    <!-- 類股熱力圖 -->
+    <div class="card">
+      <div class="card-title">🏭 各類股漲跌（點擊篩選成交量）</div>
+      <div class="sector-grid" id="sector-grid"><div class="spinner"></div></div>
+    </div>
+
+    <!-- 成交量 TOP -->
+    <div class="card">
+      <div class="card-title">🔥 成交量 TOP 30（點擊查看個股）</div>
+      <table>
+        <thead>
+          <tr>
+            <th>代號</th><th>名稱</th><th>收盤</th><th>漲跌</th>
+            <th>成交量（張）</th><th>成交金額（萬）</th>
+          </tr>
+        </thead>
+        <tbody id="top-stocks-body"><tr><td colspan="6"><span class="spinner"></span></td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- 三大法人 -->
+    <div class="card">
+      <div class="card-title">🏦 三大法人買賣超</div>
+      <div id="institutional-wrap"><span class="spinner"></span></div>
+    </div>
+
+  </div>
+
+  <!-- 右側個股詳情 -->
+  <div class="right">
+    <div id="stock-detail-header" class="right-header">
+      <div class="placeholder">← 點擊個股查看詳情</div>
+    </div>
+    <div class="right-body" id="stock-detail-body"></div>
+  </div>
+</div>
+
+<script>
+let currentStock = null;
+
+// ── 載入市場脈動 ────────────────────────────────────────────
+async function loadMarketPulse() {
+  const res = await fetch('/api/market-pulse');
+  const d   = await res.json();
+
+  const twEl = document.getElementById('tw-news');
+  twEl.innerHTML = (d.tw_news || []).map(n =>
+    `<li><a href="${n.url}" target="_blank">${n.title}</a>
+     <div class="news-source">${n.source}</div></li>`).join('');
+
+  const usEl = document.getElementById('us-news');
+  usEl.innerHTML = (d.us_news || []).map(n =>
+    `<li><a href="${n.url}" target="_blank">${n.title}</a>
+     <div class="news-source">${n.source}</div></li>`).join('');
+
+  document.getElementById('pulse-analysis').textContent = d.analysis || '—';
+  document.getElementById('last-update').textContent = '更新：' + (d.updated || new Date().toLocaleTimeString('zh-TW'));
+}
+
+// ── 載入類股 ────────────────────────────────────────────
+async function loadSectors() {
+  const res = await fetch('/api/sectors');
+  const data = await res.json();
+  const grid = document.getElementById('sector-grid');
+  grid.innerHTML = '';
+  data.forEach(s => {
+    const pct = parseFloat(s.change_pct) || 0;
+    const bg  = pct > 0 ? `rgba(248,81,73,${Math.min(Math.abs(pct)/3,1)*0.7+0.15})`
+              : pct < 0 ? `rgba(63,185,80,${Math.min(Math.abs(pct)/3,1)*0.7+0.15})`
+              : '#21262d';
+    const cls = pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat';
+    const sign = pct > 0 ? '+' : '';
+    const el = document.createElement('div');
+    el.className = 'sector-tile';
+    el.style.background = bg;
+    el.innerHTML = `
+      <div class="sector-name">${s.name}</div>
+      <div class="sector-pct ${cls}">${sign}${pct.toFixed(2)}%</div>
+      <div class="sector-idx">${parseFloat(s.index).toLocaleString()}</div>`;
+    grid.appendChild(el);
+  });
+}
+
+// ── 載入成交量 TOP ────────────────────────────────────────────
+async function loadTopStocks() {
+  const res  = await fetch('/api/top-stocks');
+  const data = await res.json();
+  const tbody = document.getElementById('top-stocks-body');
+  tbody.innerHTML = data.map(s => {
+    const chg = parseFloat(s.change) || 0;
+    const cls = chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat';
+    const sign = chg > 0 ? '+' : '';
+    const vol  = s.volume ? Math.round(parseInt(s.volume)/1000).toLocaleString() : '—';
+    const amt  = s.amount ? Math.round(parseInt(s.amount)/10000).toLocaleString() : '—';
+    return `<tr onclick="loadStock('${s.code}','${s.name}')">
+      <td>${s.code}</td>
+      <td>${s.name}</td>
+      <td class="${cls}">${s.close}</td>
+      <td class="${cls}">${sign}${s.change}</td>
+      <td>${vol}</td>
+      <td>${amt}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── 三大法人 ────────────────────────────────────────────
+async function loadInstitutional() {
+  const res  = await fetch('/api/institutional');
+  const data = await res.json();
+  const wrap = document.getElementById('institutional-wrap');
+  const maxNet = Math.max(...data.map(d => Math.abs(parseInt(d.net.replace(/,/g,''))||0)), 1);
+  wrap.innerHTML = data.map(d => {
+    const net = parseInt(d.net.replace(/,/g,'').replace(/\+/g,'')) || 0;
+    const pct = Math.abs(net) / maxNet * 100;
+    const cls = net > 0 ? 'up' : net < 0 ? 'down' : 'flat';
+    const color = net > 0 ? '#f85149' : '#3fb950';
+    const sign = net > 0 ? '+' : '';
+    const fmt = n => (Math.abs(n)/1e8).toFixed(1) + '億';
+    return `<div class="inst-row">
+      <div class="inst-name">${d.type}</div>
+      <div class="inst-bar-wrap"><div class="inst-bar" style="width:${pct}%;background:${color}"></div></div>
+      <div class="inst-net ${cls}">${sign}${fmt(net)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── 個股詳情 ────────────────────────────────────────────
+async function loadStock(code, name) {
+  currentStock = { code, name };
+  const header = document.getElementById('stock-detail-header');
+  const body   = document.getElementById('stock-detail-body');
+
+  header.innerHTML = `
+    <div class="stock-title">${name}</div>
+    <div class="stock-code">${code}</div>
+    <div class="price-row">
+      <div class="price-big" id="s-price"><span class="spinner"></span></div>
+      <div class="price-chg" id="s-chg"></div>
+    </div>
+    <div class="price-meta" id="s-meta"></div>`;
+
+  body.innerHTML = `
+    <div>
+      <div class="section-label">📰 最新新聞（國內外）</div>
+      <div id="stock-news"><span class="spinner"></span> 搜尋中...</div>
+    </div>
+    <div>
+      <button class="analyze-btn" id="analyze-btn" onclick="loadAnalysis('${code}','${name}')">
+        🤖 AI 分析：近期動態 + 未來發展
+      </button>
+      <div id="stock-analysis"></div>
+    </div>`;
+
+  // 股價
+  fetch(`/api/stock/${code}`)
+    .then(r => r.json())
+    .then(d => {
+      const chg = parseFloat(d.change) || 0;
+      const cls = chg > 0 ? 'up' : chg < 0 ? 'down' : 'flat';
+      const sign = chg > 0 ? '+' : '';
+      document.getElementById('s-price').textContent = d.close || '—';
+      document.getElementById('s-price').className = `price-big ${cls}`;
+      document.getElementById('s-chg').textContent = `${sign}${d.change}`;
+      document.getElementById('s-chg').className = `price-chg ${cls}`;
+      document.getElementById('s-meta').textContent =
+        `開 ${d.open}  高 ${d.high}  低 ${d.low}  量 ${d.volume}  ${d.date}`;
+    });
+
+  // 新聞
+  fetch(`/api/stock/${code}/news?name=${encodeURIComponent(name)}`)
+    .then(r => r.json())
+    .then(d => {
+      const allNews = [
+        ...(d.tw || []).map(n => ({...n, lang:'tw'})),
+        ...(d.en || []).map(n => ({...n, lang:'en'})),
+      ];
+      document.getElementById('stock-news').innerHTML = allNews.map(n =>
+        `<div class="news-item">
+          <a href="${n.url}" target="_blank">${n.title}${n.lang==='en' ? '<span class="badge-en">EN</span>':''}</a>
+          <div class="snip">${n.snippet || ''}</div>
+          <div class="news-source">${n.source}</div>
+        </div>`).join('') || '（無相關新聞）';
+    });
+}
+
+async function loadAnalysis(code, name) {
+  document.getElementById('analyze-btn').disabled = true;
+  document.getElementById('analyze-btn').innerHTML = '<span class="spinner"></span> AI 分析中（約 5 秒）...';
+  const res  = await fetch(`/api/stock/${code}/analysis?name=${encodeURIComponent(name)}`);
+  const data = await res.json();
+  document.getElementById('stock-analysis').innerHTML =
+    `<div class="analysis-box">${data.analysis}</div>`;
+  document.getElementById('analyze-btn').style.display = 'none';
+}
+
+// ── 全部刷新 ────────────────────────────────────────────
+async function refreshAll() {
+  await Promise.all([
+    loadMarketPulse(),
+    loadSectors(),
+    loadTopStocks(),
+    loadInstitutional(),
+  ]);
+  if (currentStock) {
+    loadStock(currentStock.code, currentStock.name);
+  }
+}
+
+// ── 自動更新（60 秒） ────────────────────────────────────────────
+refreshAll();
+setInterval(() => {
+  loadSectors();
+  loadTopStocks();
+  loadInstitutional();
+}, 60000);
+
+// 市場脈動 5 分鐘更新一次
+setInterval(loadMarketPulse, 300000);
+</script>
+</body>
+</html>

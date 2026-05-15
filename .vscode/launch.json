@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ECG Grid Search",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/ecg_train.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}

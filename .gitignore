@@ -1,0 +1,22 @@
+# 敏感資訊
+.env
+client_secret_*.json
+discord_sessions.json
+
+# Claude 本地設定
+.claude/settings.local.json
+
+# 系統檔案
+.DS_Store
+
+# 大型資料集與產出
+data/
+logs/
+output/
+*.pptx
+papers/*.pdf
+__pycache__/
+*.pyc
+
+# Playwright
+.playwright-mcp/

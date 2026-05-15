@@ -1,0 +1,11 @@
+{
+  "sent_articles": [
+    "https://github.com/openclaw/openclaw (2026-04-23)",
+    "https://vllm.ai/blog/mrv2 (2026-03-28)\nhttps://docs.vllm.ai/en/latest/design/model_runner_v2/ (2026-04)",
+    "https://ebpf.io/what-is-ebpf/ (2026-04-30)\nhttps://eunomia.dev/blog/2025/02/12/ebpf-ecosystem-progress-in-20242025-a-technical-deep-dive/ (2026-04-30)\nhttps://archive.fosdem.org/2025/schedule/event/fosdem-2025-6453-performance-evaluation-of-the-linux-kernel-ebpf-verifier/ (2026-04-30)\nhttps://cloudnativenow.com/editorial-calendar/best-of-2025/ebpf-the-silent-power-behind-cloud-natives-next-phase-2/ (2026-04-30)\nhttps://github.com/eunomia-bpf/bpftime (2026-04-30)",
+    "https://github.com/NousResearch/hermes-agent (2026-05-08)\nhttps://eu.36kr.com/en/p/3760771429958403 (2026-05-08)\nhttps://discuss.huggingface.co/t/hermes-agent-persistent-memory-and-emergent-skills-in-an-open-source-ai-agent-framework/175173 (2026-05-08)\nhttps://hermes-agent.nousresearch.com/ (2026-05-08)",
+    "https://dev.to/vaib/revolutionizing-edge-ai-deploying-models-with-webassembly-and-wasi-nn-d0h (2026-05-11)\nhttps://byteiota.com/webassembly-at-edge-how-wasm-replaced-containers/ (2026-05-11)\nhttps://github.com/WebAssembly/wasi-nn (2026-05-11)",
+    "https://www.frontiersin.org/journals/mechanical-engineering/articles/10.3389/fmech.2025.1736935/full (2026-05-12)",
+    "https://www.emqx.com/en/blog/mqtt-over-quic (2026-05-13)\nhttps://docs.emqx.com/en/emqx/latest/mqtt-over-quic/introduction.html (2026-05-13)\nhttps://www.emqx.com/en/blog/mqtt-trends-for-2025-and-beyond (2026-05-13)"
+  ]
+}
