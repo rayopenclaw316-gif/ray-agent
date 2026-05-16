@@ -1,6 +1,5 @@
 ---
 theme: seriph
-background: https://cover.sli.dev
 title: 用臉部肌電圖做中文無聲語音辨識
 info: |
   AuxCEMGR 論文解析
@@ -95,7 +94,7 @@ layout: two-cols
 
 ::right::
 
-<img src="../auxcemgr_figs/fig1.png" class="mt-4 rounded shadow" />
+<img src="./public/fig1.png" class="mt-4 rounded shadow" />
 
 <div class="text-sm text-gray-400 mt-2 text-center">Fig.1 — EMG 訊號轉文字示意圖</div>
 
@@ -126,7 +125,7 @@ layout: two-cols
 
 ::right::
 
-<img src="../auxcemgr_figs/fig2.png" class="mt-4 rounded shadow" />
+<img src="./public/fig2.png" class="mt-4 rounded shadow" />
 
 <div class="text-sm text-gray-400 mt-2 text-center">Fig.2 — 電極擺放位置</div>
 
@@ -231,7 +230,7 @@ layout: two-cols
 
 ::right::
 
-<img src="../auxcemgr_figs/fig2.png" class="mt-4 rounded shadow" style="max-height: 380px; object-fit: contain;" />
+<img src="./public/fig2.png" class="mt-4 rounded shadow" style="max-height: 380px; object-fit: contain;" />
 
 <div class="text-sm text-gray-400 mt-2 text-center">Fig.2 — 8 通道電極擺放</div>
 
@@ -320,7 +319,7 @@ layout: two-cols
 
 ::right::
 
-<img src="../auxcemgr_figs/fig3.png" class="mt-4 rounded shadow" />
+<img src="./public/fig3.png" class="mt-4 rounded shadow" />
 
 <div class="text-sm text-gray-400 mt-2 text-center">Fig.3 — 靜默 vs 有聲 EMG 波形比較</div>
 
@@ -399,7 +398,7 @@ $$\hat{S}(f) = \max\left(X(f) - \hat{N}(f),\ 0\right)$$
 
 ::right::
 
-<img src="../auxcemgr_figs/chart_aug.png" class="mt-4 rounded shadow" />
+<img src="./public/chart_aug.png" class="mt-4 rounded shadow" />
 
 <div class="text-sm text-gray-400 mt-2 text-center">三種增強各自移除後的 CER 變化</div>
 
@@ -435,7 +434,7 @@ $$x_{aug} = (1-\gamma)\cdot x_{silent} + \gamma \cdot x_{audible}$$
 
 ::right::
 
-<img src="../auxcemgr_figs/fig6.png" class="mt-4 rounded shadow" />
+<img src="./public/fig6.png" class="mt-4 rounded shadow" />
 
 <div class="text-sm text-gray-400 mt-2 text-center">Fig.6 — γ 值對 CER 的影響</div>
 
@@ -469,7 +468,7 @@ Beta(0.02, 0.02) 是 U 形分布，極度偏向 0 或 1
 
 ::right::
 
-<img src="../auxcemgr_figs/fig7.png" class="mt-4 rounded shadow" />
+<img src="./public/fig7.png" class="mt-4 rounded shadow" />
 
 <div class="text-sm text-gray-400 mt-2 text-center">Fig.7 — α 值對 CER 的影響</div>
 
@@ -535,7 +534,7 @@ layout: two-cols
 
 ::right::
 
-<img src="../auxcemgr_figs/fig4.png" class="mt-4 rounded shadow" />
+<img src="./public/fig4.png" class="mt-4 rounded shadow" />
 
 <div class="text-sm text-gray-400 mt-2 text-center">Fig.4 — AuxCEMGR 論文架構圖</div>
 
@@ -612,7 +611,7 @@ layout: two-cols
 
 ::right::
 
-<img src="../auxcemgr_figs/fig5.png" class="mt-4 rounded shadow" />
+<img src="./public/fig5.png" class="mt-4 rounded shadow" />
 
 <div class="text-sm text-gray-400 mt-2 text-center">Fig.5 — η₁/η₂ 超參數熱力圖</div>
 
@@ -650,7 +649,7 @@ layout: two-cols
 
 ::right::
 
-<img src="../auxcemgr_figs/fig11.png" class="mt-4 rounded shadow" />
+<img src="./public/fig11.png" class="mt-4 rounded shadow" />
 
 <div class="text-sm text-gray-400 mt-2 text-center">Fig.11 — 各 Session 的 CER 比較</div>
 
@@ -728,7 +727,7 @@ layout: two-cols
 
 ::right::
 
-<img src="../auxcemgr_figs/chart_main.png" class="mt-4 rounded shadow" />
+<img src="./public/chart_main.png" class="mt-4 rounded shadow" />
 
 <div class="text-sm text-gray-400 mt-2 text-center">主要結果橫條圖（越低越好）</div>
 
@@ -760,7 +759,7 @@ layout: two-cols
 
 ::right::
 
-<img src="../auxcemgr_figs/fig8.png" class="mt-4 rounded shadow" />
+<img src="./public/fig8.png" class="mt-4 rounded shadow" />
 
 <div class="text-sm text-gray-400 mt-2 text-center">Fig.8 — 各通道單獨使用的 CER</div>
 
@@ -792,7 +791,7 @@ layout: two-cols
 
 ::right::
 
-<img src="../auxcemgr_figs/fig10.png" class="mt-4 rounded shadow" />
+<img src="./public/fig10.png" class="mt-4 rounded shadow" />
 
 <div class="text-sm text-gray-400 mt-2 text-center">Fig.10 — 句子長度 vs CER</div>
 

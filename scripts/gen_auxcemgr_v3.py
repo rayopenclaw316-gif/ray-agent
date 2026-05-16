@@ -33,7 +33,7 @@ W = prs.slide_width
 H = prs.slide_height
 TOTAL = 40
 
-FONT_TC = '標楷體'
+FONT_TC = 'Times New Roman'
 FONT_EN = 'Times New Roman'
 
 # ── 輔助函數 ─────────────────────────────────────────────────────
@@ -79,27 +79,27 @@ def add_text_box(slide, text, l, t, w, h,
     return txb
 
 def add_header(slide, title, slide_no):
-    """深藍標題列 + 頁碼"""
-    # 標題背景
-    bar = slide.shapes.add_shape(
-        1, Cm(0), Cm(0), W, Cm(2.0))
-    bar.fill.solid(); bar.fill.fore_color.rgb = C_DARK
-    bar.line.fill.background()
-    # 標題文字
-    tf = bar.text_frame
-    tf.word_wrap = False
+    """純文字標題 + 細分隔線 + 頁碼（ConVbi 風格，無彩色背景）"""
+    # 標題文字（深藍粗體，無背景色）
+    txb = slide.shapes.add_textbox(Cm(0.5), Cm(0.15), W - Cm(4.5), Cm(1.65))
+    tf = txb.text_frame; tf.word_wrap = False
     p = tf.paragraphs[0]; p.alignment = PP_ALIGN.LEFT
     run = p.add_run(); run.text = title
-    run_fmt(run, bold=True, size=24, color=C_WHITE, font=FONT_TC)
+    run_fmt(run, bold=True, size=22, color=C_DARK, font=FONT_TC)
+    # 細橫線分隔
+    ln = slide.shapes.add_shape(1, Cm(0.5), Cm(1.9), W - Cm(1.0), Cm(0.06))
+    ln.fill.solid(); ln.fill.fore_color.rgb = C_MID
+    ln.line.fill.background()
     # 頁碼（右下角）
     pn = slide.shapes.add_textbox(W - Cm(3.5), H - Cm(1.0), Cm(3.2), Cm(0.8))
     tf2 = pn.text_frame; p2 = tf2.paragraphs[0]; p2.alignment = PP_ALIGN.RIGHT
     r2 = p2.add_run(); r2.text = f'{slide_no} / {TOTAL}'
     run_fmt(r2, size=14, color=C_GRAY, font=FONT_EN)
 
-def add_image(slide, path, l, t, w, h):
+def add_image(slide, path, l, t, w, h=None):
+    """插入圖片，只指定寬度讓高度依比例自動計算，避免變形"""
     if path and os.path.exists(path):
-        slide.shapes.add_picture(path, l, t, w, h)
+        slide.shapes.add_picture(path, l, t, width=w)
 
 def bullets(slide, items, l, t, w, h, size=20):
     """多層次條列（items: list of (indent, text)）"""

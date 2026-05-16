@@ -16,6 +16,8 @@
 
 #set text(font: ("Times New Roman", "STHeiti"), size: 17pt)
 #set par(leading: 0.75em)
+// 隱藏 level-2 heading 在頁面主體的顯示，避免和標題列重複；Touying 的 query() 仍可讀取
+#show heading.where(level: 2): none
 
 // 顏色
 #let dark = rgb("#1F3864")
@@ -57,7 +59,7 @@
 // ══ 一、研究背景 ══════════════════════════════════════════════
 #slide[
   == 一、什麼是無聲語音介面（SSI）？
-  #grid(columns: (1fr, 0.9fr), gutter: 1.5em)[
+  #grid(columns: (1fr, 1.2fr), gutter: 1.5em)[
     *定義*：不發出聲音，靠感測器辨識說話意圖 → 轉成文字
 
     #v(0.4em)
@@ -79,7 +81,7 @@
 
 #slide[
   == 二、為什麼用臉部 sEMG？
-  #grid(columns: (1fr, 0.9fr), gutter: 1.5em)[
+  #grid(columns: (1fr, 1.2fr), gutter: 1.5em)[
     *sEMG（表面肌電圖）*
     - 偵測肌肉收縮時的微弱電訊號（0.1–5 mV）
     - 非侵入式、即時、可穿戴
@@ -209,7 +211,7 @@
 // ══ 四、MFSC 特徵萃取 ════════════════════════════════════════
 #slide[
   == 六、MFSC 特徵萃取
-  #grid(columns: (1fr, 0.9fr), gutter: 1.5em)[
+  #grid(columns: (1fr, 1.2fr), gutter: 1.5em)[
     *為什麼做特徵萃取？*
     - 原始：1000 pt/秒 × 8 通道，維度高且冗餘
     - MFSC：36 維/時步，有意義的壓縮表徵
@@ -264,7 +266,7 @@
 
 #slide[
   == 八、資料增強詳解（Fig.6 & Fig.7）
-  #grid(columns: (1fr, 0.9fr), gutter: 1.5em)[
+  #grid(columns: (1fr, 1.2fr), gutter: 1.5em)[
     *② γ=0.8 為什麼最佳？*
     - γ=0：純靜默，訓練訊號仍微弱
     - #hl[γ=0.8]：甜蜜點，增強足夠且不過度
@@ -293,7 +295,7 @@
 // ══ 六、模型架構 ══════════════════════════════════════════════
 #slide[
   == 九、AuxCEMGR 模型架構
-  #grid(columns: (1fr, 0.85fr), gutter: 1.5em)[
+  #grid(columns: (1fr, 1.2fr), gutter: 1.5em)[
     *全名：Auxiliary-task Cascaded EMG Recognizer*
 
     *主流程（由左至右）*
@@ -452,7 +454,7 @@
 
 #slide[
   == 十四、電極通道 & 句子長度分析
-  #grid(columns: (1fr, 0.9fr), gutter: 1.5em)[
+  #grid(columns: (1fr, 1.2fr), gutter: 1.5em)[
     *電極通道重要性（Fig.8）*
     #table(
       columns: (auto, auto, 1fr),
