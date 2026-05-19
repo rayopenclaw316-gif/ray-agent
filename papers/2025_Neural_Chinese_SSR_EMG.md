@@ -100,7 +100,7 @@ CTC Decoder（Linear + Softmax）
 
 - Encoder 共享，額外接一個獨立 CTC Decoder 輸出拼音序列
 - **目的**：中文同音異字問題（如「知/之/支」同為 zhī），先學拼音可細化特徵
-- 損失：$\mathcal{L}_{pin} = -\log p(Y^g_{pin} | X)$
+- 損失：`拼音損失 = -log( 模型預測正確拼音的機率 )`
 
 ### 輔助任務 2：Session 分類（對抗訓練）
 
@@ -114,13 +114,17 @@ Session 分類器
 
 - **目的**：強迫 Encoder 學不出「是第幾次錄製」→ H 變成 session-invariant
 - **概念**：Domain Adversarial Training（可延伸至跨人泛化）
-- 損失：$\mathcal{L}_{ses} = \log p_{ses}(g_{ses} | X)$
+- 損失：`Session 損失 = log( 模型預測正確 session 編號的機率 )`
 
 ### 總訓練目標
 
-$$\mathcal{L}_{all} = \mathcal{L}_{CTC} + \eta_1 \mathcal{L}_{pin} + \eta_2 \mathcal{L}_{ses}$$
+```
+總損失 = 文字辨識損失
+       + 權重1 × 拼音生成損失
+       + 權重2 × Session 分類損失
+```
 
-最佳超參數：**η₁ = η₂ = 1.0**
+最佳超參數：**權重1 = 權重2 = 1.0**
 
 ---
 
@@ -147,7 +151,7 @@ $$\mathcal{L}_{all} = \mathcal{L}_{CTC} + \eta_1 \mathcal{L}_{pin} + \eta_2 \mat
 
 ### 關鍵發現
 
-1. **拼音輔助任務最有效**：η₁ > 0.5 時，CER 低於 Baseline（無論 η₂ 為何）
+1. **拼音輔助任務最有效**：拼音損失權重 > 0.5 時，CER 低於 Baseline（無論 Session 損失權重為何）
 2. **三種增強缺一不可**：單獨移除任一方法均導致明顯下降
 3. **Transformer >> LSTM**：LSTM 甚至無法從有聲資料中獲益
 4. **Ch 4 最重要**（下顎骨肌），Ch 5, 6（喉嚨）在靜默模式反而最弱
