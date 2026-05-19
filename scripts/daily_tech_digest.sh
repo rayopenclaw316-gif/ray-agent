@@ -14,6 +14,13 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] 腳本啟動" >> "$LOG"
 BASE="/Users/rayopenclaw/ray-agent"
 SENT_TOPICS_FILE="$BASE/sent_topics.json"
 
+# 防止同一天重複執行
+SENT_FLAG="$BASE/logs/tech_sent_$(date '+%Y%m%d')"
+if [ -f "$SENT_FLAG" ]; then
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] 今日已送出，略過" >> "$LOG"
+  exit 0
+fi
+
 SENT_LIST=$(python3 -c "import json; d=json.load(open('$SENT_TOPICS_FILE')); print('\n'.join(d['sent_articles']))" 2>/dev/null || echo "（無記錄）")
 
 PROMPT="你是陳睿莆的技術探索助理。今天請為他精選一則深度技術內容。
