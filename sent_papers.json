@@ -71,6 +71,9 @@
     "Multimodal Intelligent Monitoring of Parkinson Disease: Scoping Review of Progress and Translational Challenges",
     "Current Status and Future Perspectives of Wearable Technologies for Oral Health in Clinical Applications",
     "A thematic network qualitative study of industry leaders' perspectives on the emerging capabilities of AI-enabled hearables",
-    "Large-scale training data enhances silent speech decoding with around-ear EEG"
+    "Large-scale training data enhances silent speech decoding with around-ear EEG",
+    "EgoEMG: A Multimodal Egocentric Dataset with Bilateral EMG and Vision for Hand Pose Estimation",
+    "EMGFlow: Robust and Efficient Surface Electromyography Synthesis via Flow Matching",
+    "Cross-User sEMG-Based Voice Generation Framework Employing Feature Extraction and Model Adaptation"
   ]
 }
