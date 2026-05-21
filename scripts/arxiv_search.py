@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Query OpenAlex + Semantic Scholar for recent sEMG/SSI/Chinese-silent-speech papers."""
+"""Query OpenAlex + Semantic Scholar + PubMed for recent sEMG/SSI/Chinese-silent-speech papers."""
 import json
 import sys
 import subprocess
@@ -169,6 +169,79 @@ def parse_semantic(data):
         })
     return entries
 
+# ── PubMed ───────────────────────────────────────────────
+
+PUBMED_QUERIES = [
+    "sEMG silent speech recognition",
+    "facial electromyography speech interface",
+    "silent speech EMG deep learning",
+    "surface electromyography speech Chinese",
+]
+
+def search_pubmed_ids(query, max_results=10):
+    params = urllib.parse.urlencode({
+        "db": "pubmed",
+        "term": query,
+        "retmax": max_results,
+        "sort": "date",
+        "retmode": "json",
+        "datetype": "pdat",
+        "mindate": "2023/01/01",
+    })
+    url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?{params}"
+    result = subprocess.run(
+        ["curl", "-s", "--max-time", "30", url],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0 or not result.stdout.strip():
+        raise RuntimeError(f"curl 失敗（exit {result.returncode}）")
+    data = json.loads(result.stdout)
+    return data.get("esearchresult", {}).get("idlist", [])
+
+def fetch_pubmed_details(pmids):
+    if not pmids:
+        return []
+    ids = ",".join(pmids)
+    params = urllib.parse.urlencode({
+        "db": "pubmed",
+        "id": ids,
+        "retmode": "json",
+    })
+    url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?{params}"
+    result = subprocess.run(
+        ["curl", "-s", "--max-time", "30", url],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0 or not result.stdout.strip():
+        raise RuntimeError(f"curl 失敗（exit {result.returncode}）")
+    data = json.loads(result.stdout)
+    entries = []
+    for pmid, item in data.get("result", {}).items():
+        if pmid == "uids":
+            continue
+        title = (item.get("title") or "").strip().rstrip(".")
+        if not title:
+            continue
+        published = (item.get("pubdate") or "")[:10]
+        authors = [
+            a.get("name", "") for a in (item.get("authors") or [])[:3]
+        ]
+        doi = ""
+        for art_id in item.get("articleids") or []:
+            if art_id.get("idtype") == "doi":
+                doi = art_id.get("value", "")
+                break
+        link = f"https://doi.org/{doi}" if doi else f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"
+        entries.append({
+            "title": title,
+            "abstract": "",
+            "link": link,
+            "published": published,
+            "authors": authors,
+            "source": "PubMed",
+        })
+    return entries
+
 # ── 主程式 ────────────────────────────────────────────────
 
 def main():
@@ -207,6 +280,22 @@ def main():
                     results.append(e)
         except Exception as err:
             print(f"[Semantic Scholar] 搜尋失敗（{q}）：{err}", file=sys.stderr)
+
+    # PubMed 搜尋（NCBI E-utilities，免費免 Key）
+    for q in PUBMED_QUERIES:
+        try:
+            time.sleep(1)
+            pmids = search_pubmed_ids(q)
+            if pmids:
+                time.sleep(1)
+                for e in fetch_pubmed_details(pmids):
+                    if not is_relevant(e["title"], e["abstract"]):
+                        continue
+                    if e["title"] not in sent and e["title"] not in seen_titles:
+                        seen_titles.add(e["title"])
+                        results.append(e)
+        except Exception as err:
+            print(f"[PubMed] 搜尋失敗（{q}）：{err}", file=sys.stderr)
 
     if not results:
         print("未找到新論文。", file=sys.stderr)
