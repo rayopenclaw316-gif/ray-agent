@@ -432,70 +432,111 @@ if code in STATIC:
 
 else:
     # ── AI 動態生成（備援）──────────────────────────────────────
+    import requests as req
     from data.yf_data import get_stock_info
-    info = get_stock_info(code)
-    name    = info.get("longName") or info.get("shortName") or code
-    sector  = info.get("sector", "")
-    industry = info.get("industry", "")
-    summary = (info.get("longBusinessSummary") or "")[:500]
 
-    st.subheader(name)
-    st.caption(f"產業：{sector} / {industry}")
+    # 1. 先從 TWSE 取正確中文名稱（最可靠）
+    @st.cache_data(ttl=86400, show_spinner=False)
+    def _twse_name(stock_code: str) -> str:
+        try:
+            data = req.get(
+                "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL",
+                headers={"User-Agent": "Mozilla/5.0"}, timeout=15
+            ).json()
+            for item in data:
+                if item.get("Code", "").strip() == stock_code:
+                    return item.get("Name", "").strip()
+        except Exception:
+            pass
+        return ""
+
+    chinese_name = _twse_name(code)
+
+    # 2. Yahoo Finance 備援（英文名 + 產業背景）
+    info     = get_stock_info(code)
+    en_name  = info.get("longName") or info.get("shortName") or code
+    sector   = info.get("sector", "")
+    industry = info.get("industry", "")
+    summary  = (info.get("longBusinessSummary") or "")[:600]
+
+    display_name = f"{chinese_name}（{en_name}）" if chinese_name else en_name
+
+    st.subheader(display_name)
+    st.caption(f"股票代號：{code}　｜　產業：{sector} / {industry}")
 
     if summary:
         with st.expander("公司業務簡介（Yahoo Finance）"):
             st.write(info.get("longBusinessSummary", ""))
 
     st.markdown("---")
-    st.markdown("**此股票尚無手寫分析，可透過 AI 自動生成。**")
 
     CLAUDE_PATH = "/Applications/cmux.app/Contents/Resources/bin/claude"
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    has_claude = os.path.exists(CLAUDE_PATH)
+    api_key     = os.environ.get("ANTHROPIC_API_KEY", "")
+    has_claude  = os.path.exists(CLAUDE_PATH)
 
-    if not has_claude and not api_key:
-        st.info("AI 分析功能需要 Claude CLI 或 ANTHROPIC_API_KEY。")
+    # 顯示使用哪個 AI
+    if has_claude:
+        st.caption("AI 引擎：Claude CLI（本機 OAuth 驗證）")
+    elif api_key:
+        st.caption("AI 引擎：Claude Haiku API（ANTHROPIC_API_KEY）")
     else:
-        if st.button("用 AI 分析這家公司的產品與競爭力", type="primary"):
-            prompt = f"""你是台股分析師，請用「白話 + 生活類比」風格，以繁體中文介紹 {name}（股票代號 {code}）：
+        st.info("此股票尚無手寫分析。AI 自動生成需要 Claude CLI 或 ANTHROPIC_API_KEY。")
+        st.stop()
 
-1. **一句話說明**：這公司在做什麼？
+    st.markdown("**此股票尚無手寫分析，可透過 AI 自動生成。**")
+
+    if st.button("用 AI 分析這家公司的產品與競爭力", type="primary"):
+        # 明確給出確定的公司名稱，防止 AI 幻覺
+        company_ref = chinese_name if chinese_name else en_name
+        prompt = f"""你是台股分析師。
+
+【重要】：你要介紹的公司是：
+- 股票代號：{code}
+- 公司名稱：{company_ref}
+- 英文名稱：{en_name}
+- 產業：{sector} / {industry}
+
+請直接用這個公司名稱「{company_ref}」，不要替換成其他公司名稱。
+
+請用「白話 + 生活類比」風格，以繁體中文介紹這家公司：
+
+1. **一句話說明**：{company_ref} 在做什麼？
 2. **白話類比**：用日常生活的例子讓人理解它的商業模式
 3. **主要產品 / 服務**：具體說明它賣什麼
 4. **競爭優勢**（3–4點）：為什麼客戶要選它而不是競爭對手
 5. **主要風險**（1–2點）
 
-公司背景參考：{sector}, {industry}. {summary}
+公司背景補充：{summary}
 
-格式要求：條列式，每點簡潔（1–2句），總字數 400–600 字。不要說教，要像朋友解釋。"""
+格式要求：條列式，每點簡潔（1–2句），總字數 400–600 字。不要說教，要像朋友解釋。
+標題請使用「{company_ref}（{code}）— 白話導覽」。"""
 
-            with st.spinner("AI 分析中（約 10–15 秒）..."):
-                try:
-                    if has_claude:
-                        result = subprocess.run(
-                            [CLAUDE_PATH, "-p", prompt,
-                             "--output-format", "text",
-                             "--dangerously-skip-permissions"],
-                            capture_output=True, text=True, timeout=60
-                        )
-                        output = result.stdout.strip()
-                    else:
-                        import requests as req
-                        r = req.post(
-                            "https://api.anthropic.com/v1/messages",
-                            headers={"x-api-key": api_key,
-                                     "anthropic-version": "2023-06-01",
-                                     "Content-Type": "application/json"},
-                            json={"model": "claude-haiku-4-5-20251001",
-                                  "max_tokens": 1024,
-                                  "messages": [{"role": "user", "content": prompt}]},
-                            timeout=30
-                        )
-                        output = r.json()["content"][0]["text"]
+        with st.spinner("AI 分析中（約 10–15 秒）..."):
+            try:
+                if has_claude:
+                    result = subprocess.run(
+                        [CLAUDE_PATH, "-p", prompt,
+                         "--output-format", "text",
+                         "--dangerously-skip-permissions"],
+                        capture_output=True, text=True, timeout=60
+                    )
+                    output = result.stdout.strip()
+                else:
+                    r = req.post(
+                        "https://api.anthropic.com/v1/messages",
+                        headers={"x-api-key": api_key,
+                                 "anthropic-version": "2023-06-01",
+                                 "Content-Type": "application/json"},
+                        json={"model": "claude-haiku-4-5-20251001",
+                              "max_tokens": 1024,
+                              "messages": [{"role": "user", "content": prompt}]},
+                        timeout=30
+                    )
+                    output = r.json()["content"][0]["text"]
 
-                    if output:
-                        st.markdown(output)
-                    else:
-                        st.error("AI 未回傳內容，請稍後再試。")
-                except Exception as e:
-                    st.error(f"AI 生成失敗：{e}")
+                if output:
+                    st.markdown(output)
+                else:
+                    st.error("AI 未回傳內容，請稍後再試。")
+            except Exception as e:
+                st.error(f"AI 生成失敗：{e}")
