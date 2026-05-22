@@ -74,6 +74,11 @@
     "Large-scale training data enhances silent speech decoding with around-ear EEG",
     "EgoEMG: A Multimodal Egocentric Dataset with Bilateral EMG and Vision for Hand Pose Estimation",
     "EMGFlow: Robust and Efficient Surface Electromyography Synthesis via Flow Matching",
-    "Cross-User sEMG-Based Voice Generation Framework Employing Feature Extraction and Model Adaptation"
+    "Cross-User sEMG-Based Voice Generation Framework Employing Feature Extraction and Model Adaptation",
+    "Exploring Muscle Synergy Consistency and Physiological Interpretability in Speech Evaluation Using High-Density sEMG",
+    "Geometry of orofacial neuromuscular signals: speech articulation decoding using surface electromyography",
+    "A simplified adversarial architecture for cross-subject silent speech recognition using electromyography",
+    "Ultrathin crystalline-silicon-based strain gauges with deep learning algorithms for silent speech interfaces",
+    "Towards optimizing electrode configurations for silent speech recognition based on high-density surface electromyography"
   ]
 }
