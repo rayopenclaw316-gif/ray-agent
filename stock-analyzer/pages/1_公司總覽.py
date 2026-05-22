@@ -1,11 +1,13 @@
 import streamlit as st
 from utils.sidebar import render_sidebar
+from utils.autorefresh import maybe_autorefresh
 from data.yf_data import get_stock_info, get_price_history, get_dividends
 from analysis.technical import add_indicators
 from utils.charts import candlestick, volume
 
 st.set_page_config(page_title="公司總覽", page_icon="🏢", layout="wide")
 render_sidebar()
+maybe_autorefresh()
 code = st.session_state.get("stock_code", "2330")
 
 st.title(f"🏢 公司總覽 — {code}")

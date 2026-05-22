@@ -17,12 +17,18 @@ MA_COLORS = [C["teal"], C["orange"], C["purple"], C["blue"], C["gray"]]
 
 def _base(fig: go.Figure, title: str = "", height: int = 450) -> go.Figure:
     fig.update_layout(
-        title=title,
+        title=dict(text=title, font=dict(size=14), x=0.01, xanchor="left"),
         template="plotly_dark",
         height=height,
-        margin=dict(l=8, r=8, t=40, b=8),
+        margin=dict(l=8, r=8, t=44, b=56),
         xaxis_rangeslider_visible=False,
-        legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0),
+        legend=dict(
+            orientation="h",
+            yanchor="top", y=-0.08,
+            xanchor="left", x=0,
+            font=dict(size=11),
+            bgcolor="rgba(0,0,0,0)",
+        ),
     )
     return fig
 
