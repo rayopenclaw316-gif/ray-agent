@@ -79,6 +79,11 @@
     "Geometry of orofacial neuromuscular signals: speech articulation decoding using surface electromyography",
     "A simplified adversarial architecture for cross-subject silent speech recognition using electromyography",
     "Ultrathin crystalline-silicon-based strain gauges with deep learning algorithms for silent speech interfaces",
-    "Towards optimizing electrode configurations for silent speech recognition based on high-density surface electromyography"
+    "Towards optimizing electrode configurations for silent speech recognition based on high-density surface electromyography",
+    "Bridging Human Muscle Activity and Artificial Semantics: Neural Alignment for Brain-Computer Interfacing",
+    "Silent Speech Interface With Vocal Speaker Assistance Based on Convolution-Augmented Transformer",
+    "An EEG-EMG-Based Hybrid Brain–Computer Interface for Decoding Tones in Silent and Audible Speech",
+    "AVE Speech: A Comprehensive Multimodal Dataset for Speech Recognition Integrating Audio, Visual, and Electromyographic Signals",
+    "sEMG-based technology for silent voice recognition"
   ]
 }
