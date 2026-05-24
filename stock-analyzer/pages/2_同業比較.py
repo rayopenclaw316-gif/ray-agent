@@ -151,7 +151,8 @@ if not df_display.empty:
     main_name = next((n for n, s in members if s == code), code)
 
     def highlight_main(row):
-        return ["background-color: rgba(0,200,255,0.15)" if row["公司"] == main_name else ""
+        # row.name is the index value (公司名稱) after set_index("公司")
+        return ["background-color: rgba(0,200,255,0.15)" if row.name == main_name else ""
                 for _ in row]
 
     styled = df_display.set_index("公司").style.apply(highlight_main, axis=1)
