@@ -1,12 +1,15 @@
 """
 產品與競爭力分析。
 - 前 20 大市值股票：手寫白話說明（類比風格）
-- 其他股票：呼叫 Claude API 自動生成
+- 其他股票：呼叫 Claude API 自動生成（結果快取至本機）
 """
 import os
 import subprocess
+from datetime import datetime
 import streamlit as st
 from utils.sidebar import render_sidebar
+from utils.storage import load as load_data, save as save_data
+from utils.news import search_news
 
 st.set_page_config(page_title="產品競爭力", page_icon="🏭", layout="wide")
 render_sidebar()
@@ -474,69 +477,124 @@ else:
     api_key     = os.environ.get("ANTHROPIC_API_KEY", "")
     has_claude  = os.path.exists(CLAUDE_PATH)
 
-    # 顯示使用哪個 AI
-    if has_claude:
-        st.caption("AI 引擎：Claude CLI（本機 OAuth 驗證）")
-    elif api_key:
-        st.caption("AI 引擎：Claude Haiku API（ANTHROPIC_API_KEY）")
-    else:
+    if not has_claude and not api_key:
         st.info("此股票尚無手寫分析。AI 自動生成需要 Claude CLI 或 ANTHROPIC_API_KEY。")
         st.stop()
 
-    st.markdown("**此股票尚無手寫分析，可透過 AI 自動生成。**")
+    if has_claude:
+        st.caption("AI 引擎：Claude CLI（本機 OAuth 驗證）")
+    else:
+        st.caption("AI 引擎：Claude Haiku API（ANTHROPIC_API_KEY）")
 
-    if st.button("用 AI 分析這家公司的產品與競爭力", type="primary"):
-        # 明確給出確定的公司名稱，防止 AI 幻覺
-        company_ref = chinese_name if chinese_name else en_name
-        prompt = f"""你是台股分析師。
+    # ── 快取處理 ─────────────────────────────────────────────────
+    cache = load_data("ai_cache.json")
+    cached = cache.get(code)
 
-【重要】：你要介紹的公司是：
+    regen_clicked = False
+    if cached:
+        col_status, col_btn = st.columns([4, 1])
+        col_status.success(f"已載入快取分析（{cached.get('date', '—')}）")
+        regen_clicked = col_btn.button("🔄 重新生成", key="regen")
+        if not regen_clicked:
+            st.markdown(cached["content"])
+            st.stop()
+
+    if not regen_clicked:
+        st.markdown("**此股票尚無手寫分析，可透過 AI 自動生成深度分析（含最新新聞與競爭對手比較）。**")
+        do_generate = st.button("🔍 AI 深度分析", type="primary", key="gen")
+    else:
+        do_generate = True
+
+    if not do_generate:
+        st.stop()
+
+    # ── 執行 AI 生成 ──────────────────────────────────────────────
+    company_ref = chinese_name if chinese_name else en_name
+
+    # 搜尋最新新聞
+    news_context = ""
+    with st.spinner("搜尋最新相關新聞..."):
+        articles = search_news(f"{company_ref} {code} 股票 競爭 產品 最新", limit=5)
+        if articles:
+            news_context = "\n\n【最新相關新聞（供參考，請勿直接引用 URL）】\n"
+            for a in articles:
+                if a.get("title"):
+                    news_context += f"- {a['title']}"
+                    if a.get("description"):
+                        news_context += f"：{a['description'][:150]}"
+                    news_context += "\n"
+
+    prompt = f"""你是台股深度分析師，精通產業技術與競爭分析。
+
+【重要】你要分析的公司是：
 - 股票代號：{code}
-- 公司名稱：{company_ref}
-- 英文名稱：{en_name}
+- 公司名稱：{company_ref}（英文：{en_name}）
 - 產業：{sector} / {industry}
+請務必使用「{company_ref}」這個名稱，不要替換成其他公司。
 
-請直接用這個公司名稱「{company_ref}」，不要替換成其他公司名稱。
+請以繁體中文撰寫一份深度產品與競爭力分析，涵蓋以下六個部分：
 
-請用「白話 + 生活類比」風格，以繁體中文介紹這家公司：
+## 一句話定位
+{company_ref} 在全球產業鏈中扮演什麼角色？（1句話，點出核心價值）
 
-1. **一句話說明**：{company_ref} 在做什麼？
-2. **白話類比**：用日常生活的例子讓人理解它的商業模式
-3. **主要產品 / 服務**：具體說明它賣什麼
-4. **競爭優勢**（3–4點）：為什麼客戶要選它而不是競爭對手
-5. **主要風險**（1–2點）
+## 白話類比 + 商業模式
+用日常生活的例子解釋它如何賺錢（2–3段，避免術語）
 
-公司背景補充：{summary}
+## 核心產品技術原理
+- 主要產品或服務是什麼？
+- 背後的技術原理（用外行人也能理解的方式說明）
+- 與同類技術的本質差異（技術壁壘在哪裡？）
 
-格式要求：條列式，每點簡潔（1–2句），總字數 400–600 字。不要說教，要像朋友解釋。
-標題請使用「{company_ref}（{code}）— 白話導覽」。"""
+## 競爭對手比較
+- 列出 2–3 個主要競爭對手，說明各自優劣
+- {company_ref} 的差異化在哪裡？為什麼難以取代？
 
-        with st.spinner("AI 分析中（約 10–15 秒）..."):
-            try:
-                if has_claude:
-                    result = subprocess.run(
-                        [CLAUDE_PATH, "-p", prompt,
-                         "--output-format", "text",
-                         "--dangerously-skip-permissions"],
-                        capture_output=True, text=True, timeout=60
-                    )
-                    output = result.stdout.strip()
-                else:
-                    r = req.post(
-                        "https://api.anthropic.com/v1/messages",
-                        headers={"x-api-key": api_key,
-                                 "anthropic-version": "2023-06-01",
-                                 "Content-Type": "application/json"},
-                        json={"model": "claude-haiku-4-5-20251001",
-                              "max_tokens": 1024,
-                              "messages": [{"role": "user", "content": prompt}]},
-                        timeout=30
-                    )
-                    output = r.json()["content"][0]["text"]
+## 競爭優勢（3–4點）
+具體護城河：技術、規模、客戶關係、認證、網路效應等
 
-                if output:
-                    st.markdown(output)
-                else:
-                    st.error("AI 未回傳內容，請稍後再試。")
-            except Exception as e:
-                st.error(f"AI 生成失敗：{e}")
+## 主要風險（2–3點）
+短中期可能衝擊獲利的威脅{news_context}
+
+公司背景：{summary}
+
+格式：markdown，條列式為主，語氣直接（像跟投資人報告），總字數 600–900 字。"""
+
+    with st.spinner("AI 深度分析中（約 20–30 秒）..."):
+        try:
+            output = ""
+            if has_claude:
+                result = subprocess.run(
+                    [CLAUDE_PATH, "-p", prompt,
+                     "--output-format", "text",
+                     "--dangerously-skip-permissions"],
+                    capture_output=True, text=True, timeout=120
+                )
+                output = result.stdout.strip()
+            else:
+                r = req.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={"x-api-key": api_key,
+                             "anthropic-version": "2023-06-01",
+                             "Content-Type": "application/json"},
+                    json={"model": "claude-haiku-4-5-20251001",
+                          "max_tokens": 2048,
+                          "messages": [{"role": "user", "content": prompt}]},
+                    timeout=60
+                )
+                output = r.json()["content"][0]["text"]
+
+            if output:
+                cache[code] = {
+                    "content": output,
+                    "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                }
+                save_data("ai_cache.json", cache)
+                st.markdown(output)
+                if articles:
+                    with st.expander("📰 參考新聞來源"):
+                        for a in articles:
+                            st.markdown(f"- [{a['title']}]({a['url']})")
+            else:
+                st.error("AI 未回傳內容，請稍後再試。")
+        except Exception as e:
+            st.error(f"AI 生成失敗：{e}")
