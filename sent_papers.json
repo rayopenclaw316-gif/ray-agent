@@ -84,6 +84,11 @@
     "Silent Speech Interface With Vocal Speaker Assistance Based on Convolution-Augmented Transformer",
     "An EEG-EMG-Based Hybrid Brain–Computer Interface for Decoding Tones in Silent and Audible Speech",
     "AVE Speech: A Comprehensive Multimodal Dataset for Speech Recognition Integrating Audio, Visual, and Electromyographic Signals",
-    "sEMG-based technology for silent voice recognition"
+    "sEMG-based technology for silent voice recognition",
+    "A Highly Flexible Self-Powered Triboelectric Sensor Array for Silent Speech Recognition and Swallowing Motion Analysis",
+    "Towards Evaluating Pitch-Related Phonation Function in Speech Communication Using High-Density Surface Electromyography",
+    "A novel silent speech recognition approach based on parallel inception convolutional neural network and Mel frequency spectral coefficient",
+    "Surface Electromyography-Based Recognition, Synthesis, and Perception of Prosodic Subvocal Speech",
+    "Silent Speech Decoding Using Spectrogram Features Based on Neuromuscular Activities"
   ]
 }
