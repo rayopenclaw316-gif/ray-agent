@@ -89,6 +89,9 @@
     "Towards Evaluating Pitch-Related Phonation Function in Speech Communication Using High-Density Surface Electromyography",
     "A novel silent speech recognition approach based on parallel inception convolutional neural network and Mel frequency spectral coefficient",
     "Surface Electromyography-Based Recognition, Synthesis, and Perception of Prosodic Subvocal Speech",
-    "Silent Speech Decoding Using Spectrogram Features Based on Neuromuscular Activities"
+    "Silent Speech Decoding Using Spectrogram Features Based on Neuromuscular Activities",
+    "Exploring Silent Speech Interfaces Based on Frequency-Modulated Continuous-Wave Radar",
+    "Parallel-Inception CNN Approach for Facial sEMG based Silent Speech Recognition",
+    "Pattern learning with deep neural networks in EMG-based speech recognition"
   ]
 }
