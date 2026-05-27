@@ -92,6 +92,10 @@
     "Silent Speech Decoding Using Spectrogram Features Based on Neuromuscular Activities",
     "Exploring Silent Speech Interfaces Based on Frequency-Modulated Continuous-Wave Radar",
     "Parallel-Inception CNN Approach for Facial sEMG based Silent Speech Recognition",
-    "Pattern learning with deep neural networks in EMG-based speech recognition"
+    "Pattern learning with deep neural networks in EMG-based speech recognition",
+    "A Silent Speech Decoding System from EEG and EMG with Heterogenous Electrode Configurations",
+    "Articulatory Feature Prediction from Surface EMG during Speech Production",
+    "Wireless Silent Speech Interface Using Multi-Channel Textile EMG Sensors Integrated into Headphones",
+    "Diff-ETS: Learning a Diffusion Probabilistic Model for Electromyography-to-Speech Conversion"
   ]
 }
