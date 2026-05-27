@@ -72,15 +72,19 @@ with st.spinner("載入融資融券資料..."):
 if not mg:
     st.warning("今日融資融券資料尚未更新（收盤後約 18:00 可取得），或此代碼無融資融券。")
 else:
+    def _i(val):
+        s = str(val).replace(',', '').strip()
+        return int(s) if s else 0
+
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("融資今日餘額（張）", f"{int(mg.get('融資今日餘額','0').replace(',','')):,}")
-    c2.metric("融資買進（張）",      f"{int(mg.get('融資買進','0').replace(',','')):,}")
-    c3.metric("融券今日餘額（張）", f"{int(mg.get('融券今日餘額','0').replace(',','')):,}")
-    c4.metric("融券賣出（張）",      f"{int(mg.get('融券賣出','0').replace(',','')):,}")
+    c1.metric("融資今日餘額（張）", f"{_i(mg.get('融資今日餘額','0')):,}")
+    c2.metric("融資買進（張）",      f"{_i(mg.get('融資買進','0')):,}")
+    c3.metric("融券今日餘額（張）", f"{_i(mg.get('融券今日餘額','0')):,}")
+    c4.metric("融券賣出（張）",      f"{_i(mg.get('融券賣出','0')):,}")
 
     # 券資比
-    margin_bal = mg.get('融資今日餘額', '0').replace(',', '')
-    short_bal  = mg.get('融券今日餘額', '0').replace(',', '')
+    margin_bal = str(mg.get('融資今日餘額', '0')).replace(',', '').strip()
+    short_bal  = str(mg.get('融券今日餘額', '0')).replace(',', '').strip()
     try:
         ratio = int(short_bal) / int(margin_bal) * 100 if int(margin_bal) > 0 else 0
         st.metric("券資比", f"{ratio:.1f}%",
