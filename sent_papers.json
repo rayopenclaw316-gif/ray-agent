@@ -96,6 +96,11 @@
     "A Silent Speech Decoding System from EEG and EMG with Heterogenous Electrode Configurations",
     "Articulatory Feature Prediction from Surface EMG during Speech Production",
     "Wireless Silent Speech Interface Using Multi-Channel Textile EMG Sensors Integrated into Headphones",
-    "Diff-ETS: Learning a Diffusion Probabilistic Model for Electromyography-to-Speech Conversion"
+    "Diff-ETS: Learning a Diffusion Probabilistic Model for Electromyography-to-Speech Conversion",
+    "Real-Time Hand Gesture Recognition from EMG Biosignals Using Interpretable Deep Learning for Adaptive Prosthesis",
+    "Surface Electromyography for Silent Speech Recognition: Applications in Physiotherapy and Assistive Technologies",
+    "sEMG-Based Gesture Recognition Using Deep Learning From Noisy Labels",
+    "Few-Shot Learning for Decoding Surface Electromyography for Hand Gesture Recognition",
+    "A Robust and Accurate Deep Learning based Pattern Recognition Framework for Upper Limb Prosthesis using sEMG"
   ]
 }
