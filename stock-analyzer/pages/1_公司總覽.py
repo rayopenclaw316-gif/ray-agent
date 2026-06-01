@@ -17,7 +17,12 @@ with st.spinner("載入公司資訊..."):
     info = get_stock_info(code)
 
 if not info:
-    st.error("找不到股票資料，請確認代碼是否正確。")
+    # May be a stale cache from a transient API failure — offer a one-click retry
+    st.error(f"找不到 {code} 的股票資料。可能是快取了暫時性錯誤，或代碼不正確。")
+    if st.button("🔄 清除快取並重試"):
+        st.cache_data.clear()
+        st.rerun()
+    st.info("提示：台股代碼請輸入純數字（例如 2330、2485），OTC 股票也支援。")
     st.stop()
 
 name = info.get("longName") or info.get("shortName") or code
