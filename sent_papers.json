@@ -102,6 +102,11 @@
     "sEMG-Based Gesture Recognition Using Deep Learning From Noisy Labels",
     "Few-Shot Learning for Decoding Surface Electromyography for Hand Gesture Recognition",
     "A Robust and Accurate Deep Learning based Pattern Recognition Framework for Upper Limb Prosthesis using sEMG",
-    "Analysis and synthesis of the EMG fine structure of lip muscles during speech"
+    "Analysis and synthesis of the EMG fine structure of lip muscles during speech",
+    "Machine learning-based vowel classification using two ultrasonic transducers in pulse-echo mode",
+    "Time Frequency Analysis of EMG Signal for Gesture Recognition using Fine grained Features",
+    "A Novel Bilateral Data Fusion Approach for EMG-Driven Deep Learning in Post-Stroke Paretic Gesture Recognition",
+    "Federated Learning-Enhanced Edge Deep Learning Model for EMG-Based Gesture Recognition in Real-Time Human–Robot Interaction",
+    "A Wearable Human–Machine-Interface (HMI) System Based on Colocated EMG-pFMG Sensing for Hand Gesture Recognition"
   ]
 }
