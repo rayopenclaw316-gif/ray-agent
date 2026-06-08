@@ -56,50 +56,73 @@
 | Jain & Pal (2025) | Multi-DTW 樣本篩選 + 合成資料增強策略，低資源 8 通道 sEMG 英文句子級 Seq2Seq 辨識 | 8 通道 OpenBCI，Multi-DTW 篩選 exemplar + cross-fading 合成訓練句 + 注意力 Seq2Seq（CNN+BiLSTM 編碼 + LSTM 解碼），22 詞英文句子，WER 9.3% | 250 Hz | OpenBCI Cyton Board + 金杯電極 + Ten20 導電膏 | 8 | orbicularis oris（下唇）、submental（頦下）、bilateral SCM（頸部雙側）、zygomaticus major + risorius（臉頰）、masseter（下顎線）| HP 0.1 Hz（實驗最優，保留低頻發音資訊）；Multi-DTW 從每詞 ≥20 樣本選 17 個最具代表性 exemplar | CNN(×2, ReLU) + BiLSTM(×2) 編碼 + Attention + 自迴歸 LSTM 解碼（22 詞詞彙）；合成增強：cross-fading 50ms + 高斯噪音 SNR20–30dB + 時間彎曲 ±10% + 基線漂移 | Seq2Seq WER 9.3%（vs CTC 16.4%）；孤立詞 CNN 90.9%（vs 84.4%）；34 句中 23 句完全正確 |
 | Xie et al. (2025) AuxCEMGR | 首個中文神經端對端 sEMG→文字辨識系統，建立中文 EMG-文本語料庫，Transformer+CTC+輔助任務 | 8 通道，1238 句 NBA 中文語料，CNN + Transformer 編碼 + CTC 解碼，加拼音生成 + session 對抗分類兩輔助任務，三種增強，AuxCEMGR 達 38.0% CER | 1000 Hz | Neuracle NSW308M 雙極系統 + Ag/AgCl 電極 | 8（雙極，16 差分電極）| ch1(jaw), ch2(orbicularis oris), ch3–8（臉頸部，依 Diener 2015）；ch4（下顎肌+喉部）最重要；ch5–6（喉部）在無聲模式貢獻最差 | BP 10–400 Hz（4 階 Butterworth）+ notch 50/150/250/350 Hz → MFSC（Hanning 窗，36 Mel 濾波器，Librosa 實作）| CNN(×2, k=3×3) + Transformer(×6, head=8, dim=256) + CTC；輔助：拼音 CTC(η₁=1.0) + session GRL+CE(η₂=1.0)；增強：頻譜相減 + 有聲資料(γ=0.8) + mixup(α=0.02)；Adam + Noam；batch=128 | AuxCEMGR Final: CER 38.0%（vs Baseline 44.5%，vs LSTM+CTC 66.8%）；1238 句中文 NBA；Transformer >> LSTM |
 
+> **以下兩篇為 sEMG→語音重建（Voice Reconstruction），任務為合成音訊而非辨識文字，屬同類架構的平行研究分支。**
+
+| 作者（年） | 研究貢獻與目標 | 摘要（一句話） | EMG 採樣率 | 設備 | 通道數 | 電極位置 | 訊號前處理 | 模型（含參數） | 主要結果 |
+|-----------|-------------|------------|-----------|------|--------|---------|----------|-------------|--------|
+| Li et al. (2022) SSRNet | 首個普通話聲調語言 sEMG→語音重建系統，以聲調素輔助任務解決聲調辨識，DTW 時長對齊 | 5 通道浙大自製設備，Butterworth BP + 自調陷波，TD+STFT 特徵，Feed-Forward Transformer Seq2Seq + Length Regulator + PWG 聲碼器，聲調素輔助分類，主觀 CER 6.41% | 2000 Hz | 自製多通道生物電訊號採集器（浙大 Guang Li 組）| 5 | ch1(鼻右 1cm 差分), ch2(嘴角右 1cm), ch3(鼻左 1cm), ch4(下巴左角), ch5(下巴後 4cm) | Butterworth BP 4–400 Hz + 自調式陷波（50 Hz 及諧波）→ TD+STFT 特徵（355 維/幀）| SSRNet = FFT Encoder(6 層, dim=384) + DTW Duration Extractor + Length Regulator + FFT Decoder(6 層) + PWG 聲碼器；輔助：聲調素分類(λ=0.5) + 有聲 EMG 重建(λ=0.5)；音素詞彙 139 | 主觀 CER 6.41%（vs 39.76% 基線）；聲調素分類 96.07%；**移除聲調輔助任務 → CER +132.75%**（消融最大影響）|
+| Li et al. (2023) silentVC | 輔助有聲說話者跨說話者架構 + Conformer（CNN+Transformer 混合）編碼器，首次在跨說話者場景下實現普通話 sEMG→語音轉換 | 5 通道，4 主說話者（靜音）× 2 輔助說話者（有聲），Conformer 編碼器 + Length Regulator + Transformer 解碼器，三任務損失（mel+音素+時長），ASR CER 10.69% | 2000 Hz | 自製多通道生物電訊號採集器（浙大 Guang Li 組，同 Li 2022）| 5（ch1 差分，其餘單電極；臉部與頸部）| 臉部與頸部，與普通話發音肌群相關（Fig.1，同浙大設定）| RC 濾波（DC + 5 kHz LP）+ Butterworth BP 4–400 Hz + 自適應梳狀濾波（50 Hz 諧波）→ TD+STFT 特徵（355 維/幀）| MFT = Conformer-silentVC 編碼器(6 塊, 序列結構, SeLU, 相對位置編碼) + Length Regulator（DTW 迭代更新，每 5 epoch）+ Transformer 解碼器(6 塊) + Post-Net + PWG；三任務：L_mel(λ=1.0) + L_dur(λ=1.0) + L_ph(λ=0.5, 音素 139)；ESPnet | ASR CER 10.69%±5.79%；人工 CER 5.31%；MOS 3.95；**去除 Conv 模組 → CER +20.91%**；直接 sEMG→音訊優於兩步驟 sEMG→音素→TTS（+31.22%）|
+
 ---
 
-## 四、快速比較索引
+## 四、聲調語言 EEG-BCI 研究（輔助論述）
 
-### 4.1 採樣率
+> **以下研究訊號模態為 EEG（腦電圖），非 sEMG，用於提供聲調語言神經生理學背景。**
+
+| 作者（年） | 研究貢獻與目標 | 摘要（一句話） | EEG 採樣率 | 設備 | 通道數 | 電極位置 | 訊號前處理 | 特徵 / 模型 | 主要結果 |
+|-----------|-------------|------------|-----------|------|--------|---------|----------|------------|--------|
+| Yang et al. (2022) | 首次以 EEG RASM 不對稱特徵區分有聲調/無聲調普通話，提出 BVA 跨受試者特徵選擇，98.82% 跨受試者準確率 | 14 受試者，64 通道 EEG，RASM（左右半球 DE 比值）+ BVA 降維（14 特徵）+ LDA，BRCSpeech 普通話語料，有聲調 vs 無聲調二元分類 | 1000 Hz（降採樣 500 Hz）| SynAmps (Compumedics)，64 Ag/AgCl 電極，國際 10-20 系統 | 64（精簡後 8 通道最佳：F7/F8, C5/C6, P5/P6, O1/O2）| 頭皮電極（額葉、中央、頂葉、枕葉）；最關鍵：**(C5, C6) All-band**（對應說話感覺運動皮層）| BP 0.5–180 Hz + 降採樣 500 Hz + EEGLAB 偽差去除；基線校正：前 1 秒 BS 功率相減 | RASM（左右對稱電極對 DE 之比，162 維）→ BVA 降維（14 特徵）→ LDA；6 頻段；BS / Before Speak / Speak 三時段 | 跨受試者 RASM+LDA Speak：**98.82%**（SD=0.66）；單受試者：**99.40%**；8 通道：94.44%；High Gamma（60–170 Hz）最佳頻段；Before Speak 97.72%（說話前差異已存在）|
+
+---
+
+## 五、快速比較索引
+
+### 5.1 採樣率
 
 | 採樣率 | 論文 |
 |--------|------|
 | 未明 / 低（1970–1990s）| Netsell (1974), Sugie (1985), Chan (2001a/b) |
 | 600 Hz | Maier-Hein (2005), Schultz (2010), Wand (2014), Wand & Schmidhuber (2016) |
 | 250 Hz | Kapur (2018), Jain (2025) |
-| 1000 Hz | Wang (2020), Ye (2020), Xie (2025) |
+| 1000 Hz | Wang (2020), Ye (2020), Xie (2025), Yang (2022)★EEG |
+| 2000 Hz | Li (2022), Li (2023) |
 | 未明（高）| Meltzner (2018) |
 
-### 4.2 通道數
+### 5.2 通道數（sEMG）
 
 | 通道數 | 論文 |
 |--------|------|
 | 3 | Sugie (1985) |
 | 4 | Chan (2001a/b), Ye (2020) |
-| 5 | Maier-Hein (2005), Schultz (2010), Wand (2014), Wand & Schmidhuber (2016) |
+| 5 | Maier-Hein (2005), Schultz (2010), Wand (2014), Wand & Schmidhuber (2016), Li (2022), Li (2023) |
 | 6 | Wang (2020) |
 | 7 | Kapur (2018) |
 | 8 | Meltzner (2018), Jain (2025), Xie (2025) |
+| 64★EEG | Yang (2022) |
 
-### 4.3 說話模式
+### 5.3 說話模式
 
 | 模式 | 論文 |
 |------|------|
-| 有聲語音（audible）| Wand & Schmidhuber (2016)（訓練用）|
-| mime speech（無聲嘴部動作）| Maier-Hein (2005), Schultz (2010), Wand (2014), Meltzner (2018), Ye (2020), Jain (2025), Xie (2025) |
+| 有聲語音（audible）| Wand & Schmidhuber (2016)（訓練用）；Li (2022)（配對訓練用）；Li (2023) 輔助說話者 |
+| mime speech（無聲嘴部動作）| Maier-Hein (2005), Schultz (2010), Wand (2014), Meltzner (2018), Ye (2020), Jain (2025), Xie (2025), Li (2022/2023) 主說話者 |
 | 內部發聲（無嘴部動作）| Kapur (2018) |
 | 想像說話（無任何動作）| Wang (2020) |
+| 有聲 / 無聲調語音★EEG | Yang (2022) |
 
-### 4.4 最佳辨識結果對比
+### 5.4 最佳辨識結果對比
 
-| 論文 | 語言 | 任務規模 | 最佳結果 |
-|------|------|---------|---------|
-| Maier-Hein (2005) | 英語 | 孤立詞 | 97.3%（session-dep）/ 76.2%（session-indep）|
-| Schultz (2010) | 英語 | 101 詞連續 | 31.5% WER |
-| Meltzner (2018) | 英語 | 2200 詞連續 | 8.9% WER |
-| Wand & Schmidhuber (2016) | 英語 | 108 詞連續（有聲訓練）| 20.0% WER（開發集）|
-| Kapur (2018) | 英語 | 10 數字 | 92.01% Acc |
-| Ye (2020) | 中文 | 4 詞孤立 | 97.11% Acc |
-| Wang (2020) | 中文 | 10 詞孤立 | 90% Acc |
-| Jain & Pal (2025) | 英語 | 22 詞句子（Seq2Seq）| 9.3% WER |
-| Xie et al. (2025) | 中文 | 1238 句連續（字符級）| 38.0% CER |
+| 論文 | 語言 | 任務類型 | 任務規模 | 最佳結果 |
+|------|------|---------|---------|---------|
+| Maier-Hein (2005) | 英語 | sEMG→文字 | 孤立詞 | 97.3% Acc（session-dep）/ 76.2%（session-indep）|
+| Schultz (2010) | 英語 | sEMG→文字 | 101 詞連續 | 31.5% WER |
+| Meltzner (2018) | 英語 | sEMG→文字 | 2200 詞連續 | 8.9% WER |
+| Wand & Schmidhuber (2016) | 英語 | sEMG→文字 | 108 詞連續 | 20.0% WER（開發集）|
+| Kapur (2018) | 英語 | sEMG→文字 | 10 數字 | 92.01% Acc |
+| Ye (2020) | 中文 | sEMG→文字 | 4 詞孤立 | 97.11% Acc |
+| Wang (2020) | 中文 | sEMG→文字 | 10 詞孤立 | 90% Acc |
+| Jain & Pal (2025) | 英語 | sEMG→文字 | 22 詞句子 | 9.3% WER |
+| Xie et al. (2025) | 中文 | sEMG→文字 | 1238 句連續 | 38.0% CER |
+| Li et al. (2022) | 普通話 | sEMG→語音 | 句子（AISHELL3）| 6.41% CER（主觀）|
+| Li et al. (2023) | 普通話 | sEMG→語音（跨說話者）| 句子（AISHELL3）| 10.69% CER（ASR）/ 5.31%（人工）|
+| Yang et al. (2022) ★EEG | 普通話 | EEG→聲調分類 | 有聲調 vs 無聲調（二元）| 98.82% Acc（跨受試者）|
