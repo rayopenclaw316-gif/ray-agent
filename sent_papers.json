@@ -107,6 +107,9 @@
     "Time Frequency Analysis of EMG Signal for Gesture Recognition using Fine grained Features",
     "A Novel Bilateral Data Fusion Approach for EMG-Driven Deep Learning in Post-Stroke Paretic Gesture Recognition",
     "Federated Learning-Enhanced Edge Deep Learning Model for EMG-Based Gesture Recognition in Real-Time Human–Robot Interaction",
-    "A Wearable Human–Machine-Interface (HMI) System Based on Colocated EMG-pFMG Sensing for Hand Gesture Recognition"
+    "A Wearable Human–Machine-Interface (HMI) System Based on Colocated EMG-pFMG Sensing for Hand Gesture Recognition",
+    "Cross-modal latent alignment enables efficient compression of wearable sEMG and accelerometer signals",
+    "A 1000-hour EEG-EMG-audio dataset of Japanese speech production",
+    "MyoSem: Aligning Electromyography to Natural-Language Action Semantics for Hand Action Understanding"
   ]
 }
