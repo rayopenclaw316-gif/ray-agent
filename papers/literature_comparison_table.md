@@ -2,7 +2,7 @@
 
 **排序：** 生理基礎 → 傳統 ML → 深度學習（DNN-HMM → CNN → RNN+Attention → Seq2Seq/Transformer）  
 **評估指標：** WER = 詞語錯誤率；CER = 字元錯誤率；Acc = 分類準確率  
-**更新日期：** 2026-06-09（加入 Liu et al. 2026）
+**更新日期：** 2026-06-09（加入 Chen et al. 2023、Song et al. 2023）
 
 ---
 
@@ -53,6 +53,8 @@
 
 | 作者（年） | 研究貢獻與目標 | 摘要（一句話） | EMG 採樣率 | 設備 | 通道數 | 電極位置 | 訊號前處理 | 模型（含參數） | 主要結果 |
 |-----------|-------------|------------|-----------|------|--------|---------|----------|-------------|--------|
+| Chen et al. (2023) CBiL-CTC | 64 通道 HD-sEMG 空時端對端辨識：CNN 空間塊（8×8 影像）+ BiLSTM 時序塊 + CTC 解碼 + 語言模型，首批中文 sEMG 音節級序列解碼 | USTC Xu Zhang 組：64ch HD-sEMG 排列為 8×8 影像，CNN 提空間特徵 + BiLSTM-CTC 序列解碼，15 受試者 33 中文片語，CER 3.11%，優於分類方法和純 BiLSTM-CTC | 1000 Hz | 自製多通道採集（USTC Xu Zhang 組）| 64（4 件陣列，雙側）| 臉部（buccinator, masseter, orbicularis oris）× 2 + 喉頸（cervical, digastric anterior）× 2；電極間距 10–18 mm；排列為 8×8 影像 | 帶通 20–500 Hz + 64 dB 增益 → 4 特徵/通道/幀（MAV + 3 TD-PSD）→ 8×8×4；幀長 200 ms，步進 180 ms | CBiL-CTC = CNN(Conv×2, BN, Dropout) + Flatten + BiLSTM(3 層, 256/256/128) + CTC；Nadam lr=0.01, 500 epochs；LM = 編輯距離 | **CER 3.11 ± 1.46%**，PCA 97.17 ± 1.53%；去除 CNN → CER 4.76%（+53%）；15 受試者，5-fold CV |
+| Song et al. (2023) | 64 通道 HD-sEMG + Transformer encoder-decoder + 音節相似度語言模型，中文音節級序列解碼 | USTC Xu Zhang 組：64ch HD-sEMG，Hudgins TD 特徵（256-dim）→ Transformer encoder-decoder（N=4, h=4）→ LM，8 受試者 33 中文片語，CER 5.14%，優於 LSTM decoder（12.04%）| 1000 Hz | 自製多通道採集（USTC，同 Chen 2023）| 64（2 件 × 32 通道，雙側）| 臉部（zygomatic major/minor, risorius）× 2 + 頸部（SCM, digastric, platysma）× 2；電極直徑 5 mm，間距 10–18 mm | 帶通 20–500 Hz + 64 dB 增益 → Hudgins 4 TD（MAV, ZC, SSC, WL）× 64 ch = 256-dim 向量；T=60 幀固定 | Transformer enc-dec（N=4, h=4, dmodel=256, dff=1024, Dropout=0.1）+ Beam Search（size=2）；Adam lr=6×10⁻⁵；LM = 音節相似度 2×Ns/(L(Ŷ)+L(P)) | **CER 5.14 ± 3.28%**，PCA 96.37 ± 2.06%；LSTM decoder CER 12.04%（Transformer 相對改善 57%）；8 受試者，5-fold CV |
 | Jain & Pal (2025) | Multi-DTW 樣本篩選 + 合成資料增強策略，低資源 8 通道 sEMG 英文句子級 Seq2Seq 辨識 | 8 通道 OpenBCI，Multi-DTW 篩選 exemplar + cross-fading 合成訓練句 + 注意力 Seq2Seq（CNN+BiLSTM 編碼 + LSTM 解碼），22 詞英文句子，WER 9.3% | 250 Hz | OpenBCI Cyton Board + 金杯電極 + Ten20 導電膏 | 8 | orbicularis oris（下唇）、submental（頦下）、bilateral SCM（頸部雙側）、zygomaticus major + risorius（臉頰）、masseter（下顎線）| HP 0.1 Hz（實驗最優，保留低頻發音資訊）；Multi-DTW 從每詞 ≥20 樣本選 17 個最具代表性 exemplar | CNN(×2, ReLU) + BiLSTM(×2) 編碼 + Attention + 自迴歸 LSTM 解碼（22 詞詞彙）；合成增強：cross-fading 50ms + 高斯噪音 SNR20–30dB + 時間彎曲 ±10% + 基線漂移 | Seq2Seq WER 9.3%（vs CTC 16.4%）；孤立詞 CNN 90.9%（vs 84.4%）；34 句中 23 句完全正確 |
 | Xie et al. (2025) AuxCEMGR | 首個中文神經端對端 sEMG→文字辨識系統，建立中文 EMG-文本語料庫，Transformer+CTC+輔助任務 | 8 通道，1238 句 NBA 中文語料，CNN + Transformer 編碼 + CTC 解碼，加拼音生成 + session 對抗分類兩輔助任務，三種增強，AuxCEMGR 達 38.0% CER | 1000 Hz | Neuracle NSW308M 雙極系統 + Ag/AgCl 電極 | 8（雙極，16 差分電極）| ch1(jaw), ch2(orbicularis oris), ch3–8（臉頸部，依 Diener 2015）；ch4（下顎肌+喉部）最重要；ch5–6（喉部）在無聲模式貢獻最差 | BP 10–400 Hz（4 階 Butterworth）+ notch 50/150/250/350 Hz → MFSC（Hanning 窗，36 Mel 濾波器，Librosa 實作）| CNN(×2, k=3×3) + Transformer(×6, head=8, dim=256) + CTC；輔助：拼音 CTC(η₁=1.0) + session GRL+CE(η₂=1.0)；增強：頻譜相減 + 有聲資料(γ=0.8) + mixup(α=0.02)；Adam + Noam；batch=128 | AuxCEMGR Final: CER 38.0%（vs Baseline 44.5%，vs LSTM+CTC 66.8%）；1238 句中文 NBA；Transformer >> LSTM |
 
@@ -97,7 +99,7 @@
 | 600 Hz | Maier-Hein (2005), Schultz (2010), Wand (2014), Wand & Schmidhuber (2016) |
 | 250 Hz | Kapur (2018), Jain (2025) |
 | 1000 Hz（→800 Hz）| Gaddy (2021) |
-| 1000 Hz | Wang (2020), Ye (2020), Xie (2025), Yang (2022)★EEG, Liu (2026) |
+| 1000 Hz | Wang (2020), Ye (2020), Xie (2025), Yang (2022)★EEG, Liu (2026), Chen (2023), Song (2023) |
 | 2000 Hz | Li (2022), Li (2023) |
 | 未明（高）| Meltzner (2018) |
 
@@ -113,6 +115,7 @@
 | 8 | Meltzner (2018), Jain (2025), Xie (2025), Gaddy (2021) |
 | 16（從 32 選出）| Liu (2026) |
 | 32 原始 | Liu (2026) |
+| 64（HD sEMG）| Chen (2023), Song (2023) |
 | 64★EEG | Yang (2022) |
 
 ### 5.3 說話模式
@@ -120,7 +123,7 @@
 | 模式 | 論文 |
 |------|------|
 | 有聲語音（audible）| Wand & Schmidhuber (2016)（訓練用）；Li (2022)（配對訓練用）；Li (2023) 輔助說話者 |
-| mime speech（無聲嘴部動作）| Maier-Hein (2005), Schultz (2010), Wand (2014), Meltzner (2018), Ye (2020), Jain (2025), Xie (2025), Li (2022/2023) 主說話者 |
+| mime speech（無聲嘴部動作）| Maier-Hein (2005), Schultz (2010), Wand (2014), Meltzner (2018), Ye (2020), Jain (2025), Xie (2025), Li (2022/2023) 主說話者, Chen (2023), Song (2023) |
 | 內部發聲（無嘴部動作）| Kapur (2018) |
 | 想像說話（無任何動作）| Wang (2020) |
 | 有聲 / 無聲調語音★EEG | Yang (2022) |
@@ -137,6 +140,8 @@
 | Ye (2020) | 中文 | sEMG→文字 | 4 詞孤立 | 97.11% Acc |
 | Wang (2020) | 中文 | sEMG→文字 | 10 詞孤立 | 90% Acc |
 | Jain & Pal (2025) | 英語 | sEMG→文字 | 22 詞句子 | 9.3% WER |
+| Chen et al. (2023) | 中文 | sEMG→文字 | 33 片語（封閉）| **3.11 ± 1.46% CER** |
+| Song et al. (2023) | 中文 | sEMG→文字 | 33 片語（封閉）| 5.14 ± 3.28% CER |
 | Xie et al. (2025) | 中文 | sEMG→文字 | 1238 句連續 | 38.0% CER |
 | Li et al. (2022) | 普通話 | sEMG→語音 | 句子（AISHELL3）| 6.41% CER（主觀）|
 | Li et al. (2023) | 普通話 | sEMG→語音（跨說話者）| 句子（AISHELL3）| 10.69% CER（ASR）/ 5.31%（人工）|
