@@ -2,7 +2,7 @@
 
 **排序：** 生理基礎 → 傳統 ML → 深度學習（DNN-HMM → CNN → RNN+Attention → Seq2Seq/Transformer）  
 **評估指標：** WER = 詞語錯誤率；CER = 字元錯誤率；Acc = 分類準確率  
-**更新日期：** 2026-06-09
+**更新日期：** 2026-06-09（加入 Liu et al. 2026）
 
 ---
 
@@ -56,13 +56,14 @@
 | Jain & Pal (2025) | Multi-DTW 樣本篩選 + 合成資料增強策略，低資源 8 通道 sEMG 英文句子級 Seq2Seq 辨識 | 8 通道 OpenBCI，Multi-DTW 篩選 exemplar + cross-fading 合成訓練句 + 注意力 Seq2Seq（CNN+BiLSTM 編碼 + LSTM 解碼），22 詞英文句子，WER 9.3% | 250 Hz | OpenBCI Cyton Board + 金杯電極 + Ten20 導電膏 | 8 | orbicularis oris（下唇）、submental（頦下）、bilateral SCM（頸部雙側）、zygomaticus major + risorius（臉頰）、masseter（下顎線）| HP 0.1 Hz（實驗最優，保留低頻發音資訊）；Multi-DTW 從每詞 ≥20 樣本選 17 個最具代表性 exemplar | CNN(×2, ReLU) + BiLSTM(×2) 編碼 + Attention + 自迴歸 LSTM 解碼（22 詞詞彙）；合成增強：cross-fading 50ms + 高斯噪音 SNR20–30dB + 時間彎曲 ±10% + 基線漂移 | Seq2Seq WER 9.3%（vs CTC 16.4%）；孤立詞 CNN 90.9%（vs 84.4%）；34 句中 23 句完全正確 |
 | Xie et al. (2025) AuxCEMGR | 首個中文神經端對端 sEMG→文字辨識系統，建立中文 EMG-文本語料庫，Transformer+CTC+輔助任務 | 8 通道，1238 句 NBA 中文語料，CNN + Transformer 編碼 + CTC 解碼，加拼音生成 + session 對抗分類兩輔助任務，三種增強，AuxCEMGR 達 38.0% CER | 1000 Hz | Neuracle NSW308M 雙極系統 + Ag/AgCl 電極 | 8（雙極，16 差分電極）| ch1(jaw), ch2(orbicularis oris), ch3–8（臉頸部，依 Diener 2015）；ch4（下顎肌+喉部）最重要；ch5–6（喉部）在無聲模式貢獻最差 | BP 10–400 Hz（4 階 Butterworth）+ notch 50/150/250/350 Hz → MFSC（Hanning 窗，36 Mel 濾波器，Librosa 實作）| CNN(×2, k=3×3) + Transformer(×6, head=8, dim=256) + CTC；輔助：拼音 CTC(η₁=1.0) + session GRL+CE(η₂=1.0)；增強：頻譜相減 + 有聲資料(γ=0.8) + mixup(α=0.02)；Adam + Noam；batch=128 | AuxCEMGR Final: CER 38.0%（vs Baseline 44.5%，vs LSTM+CTC 66.8%）；1238 句中文 NBA；Transformer >> LSTM |
 
-> **以下三篇為 sEMG→語音重建（Voice Reconstruction），任務為合成音訊而非辨識文字，屬同類架構的平行研究分支。**
+> **以下四篇為 sEMG→語音重建（Voice Reconstruction），任務為合成音訊而非辨識文字，屬同類架構的平行研究分支。**
 
 | 作者（年） | 研究貢獻與目標 | 摘要（一句話） | EMG 採樣率 | 設備 | 通道數 | 電極位置 | 訊號前處理 | 模型（含參數） | 主要結果 |
 |-----------|-------------|------------|-----------|------|--------|---------|----------|-------------|--------|
 | Gaddy & Klein (2021) | 首次將 CNN + Transformer 引入 sEMG 語音合成，並引入音素輔助損失，open vocabulary WER 68%→42.2% | 3 殘差 Conv1D 塊取代手工特徵 + 6 層 Transformer（相對位置編碼）+ 音素輔助損失（λ=0.1），英語 open vocabulary，WER 42.2%（自動）/ 32.3%（人工）| 1000 Hz（→800 Hz）| Gaddy & Klein (2020) 臉部電極裝置 | 8 | 臉部周圍 8 電極 | 60 Hz 諧波帶阻 + 2 Hz HP（DC 漂移）+ 重採樣 ×0.1 振幅縮放 | Conv1D 殘差塊×3（800→100 Hz, dim=768）+ Session 嵌入（32→768 維）+ Transformer×6（8 頭, dim=768, FF=3072, 相對 PE）→ 26 MFCC → WaveNet；音素輔助頭（訓練後丟棄）；DTW 對齊；AdamW | **WER 42.2%**（vs 基線 68.0%）；消融：移除音素損失 +9.5%（最大貢獻）；Transformer→LSTM +3.8%；手工特徵 +3.0% |
 | Li et al. (2022) SSRNet | 首個普通話聲調語言 sEMG→語音重建系統，以聲調素輔助任務解決聲調辨識，DTW 時長對齊 | 5 通道浙大自製設備，Butterworth BP + 自調陷波，TD+STFT 特徵，Feed-Forward Transformer Seq2Seq + Length Regulator + PWG 聲碼器，聲調素輔助分類，主觀 CER 6.41% | 2000 Hz | 自製多通道生物電訊號採集器（浙大 Guang Li 組）| 5 | ch1(鼻右 1cm 差分), ch2(嘴角右 1cm), ch3(鼻左 1cm), ch4(下巴左角), ch5(下巴後 4cm) | Butterworth BP 4–400 Hz + 自調式陷波（50 Hz 及諧波）→ TD+STFT 特徵（355 維/幀）| SSRNet = FFT Encoder(6 層, dim=384) + DTW Duration Extractor + Length Regulator + FFT Decoder(6 層) + PWG 聲碼器；輔助：聲調素分類(λ=0.5) + 有聲 EMG 重建(λ=0.5)；音素詞彙 139 | 主觀 CER 6.41%（vs 39.76% 基線）；聲調素分類 96.07%；**移除聲調輔助任務 → CER +132.75%**（消融最大影響）|
 | Li et al. (2023) silentVC | 輔助有聲說話者跨說話者架構 + Conformer（CNN+Transformer 混合）編碼器，首次在跨說話者場景下實現普通話 sEMG→語音轉換 | 5 通道，4 主說話者（靜音）× 2 輔助說話者（有聲），Conformer 編碼器 + Length Regulator + Transformer 解碼器，三任務損失（mel+音素+時長），ASR CER 10.69% | 2000 Hz | 自製多通道生物電訊號採集器（浙大 Guang Li 組，同 Li 2022）| 5（ch1 差分，其餘單電極；臉部與頸部）| 臉部與頸部，與普通話發音肌群相關（Fig.1，同浙大設定）| RC 濾波（DC + 5 kHz LP）+ Butterworth BP 4–400 Hz + 自適應梳狀濾波（50 Hz 諧波）→ TD+STFT 特徵（355 維/幀）| MFT = Conformer-silentVC 編碼器(6 塊, 序列結構, SeLU, 相對位置編碼) + Length Regulator（DTW 迭代更新，每 5 epoch）+ Transformer 解碼器(6 塊) + Post-Net + PWG；三任務：L_mel(λ=1.0) + L_dur(λ=1.0) + L_ph(λ=0.5, 音素 139)；ESPnet | ASR CER 10.69%±5.79%；人工 CER 5.31%；MOS 3.95；**去除 Conv 模組 → CER +20.91%**；直接 sEMG→音訊優於兩步驟 sEMG→音素→TTS（+31.22%）|
+| Liu et al. (2026) | Gumbel-Softmax 可微分電極選擇（32→16 ch）+ ResNet-Conformer + GSN 閘控正規化 + NIC 雜訊注入訓練 + 波形重建虛擬感測器，普通話 sEMG→語音合成高魯棒性系統 | 32 通道可撓式電極陣列，Gumbel-Softmax 端對端選出 16 通道（稀疏 CER 10.19% 優於全密度 12.78%）；乾淨條件 CER 11.61%；Drop4 故障場景 CER 35.36% vs 基線 73.54%；故障診斷 AUC 0.727–0.850 | 1000 Hz | 自製三層疊層電子皮膚 + RHD2132 晶片 + Wi-Fi 無線傳輸（SCUT Longhan Xie 組）| 32 原始（Gumbel 選出 16）| 臉部：Masseter, Zygomaticus/Buccinator, Depressor Anguli Oris（F1–F16）；下顎：Digastric Anterior, Mylohyoid（J1–J16）；最重要：嘴角（modiolus）+ 頦下（submental）| Butterworth HP 4 階 5 Hz + 50 Hz 陷波 + 每通道 Z-score 正規化 | Gumbel-Softmax 選擇器（π 向量，溫度退火）→ 1D-ResNet 下採樣 → Conformer×6（8 頭, dim=512, dropout=0.2）+ GSN（α·IN+(1-α)·LN）→ Mel 解碼 + 音素頭 + 重建解碼 → HiFi-GAN；L_mel(DTW)+λ_p·L_ph(0.5)+λ_r·L_recon(1→0.05)+λ_c·L_consist(0.5) | **稀疏 16 ch CER 10.19%**（vs 全密度 32 ch 12.78%）；乾淨 11.61%；Drop4 35.36%；LOSO 跨受試者 47.83%（受試者依賴性強）|
 
 ---
 
@@ -96,7 +97,7 @@
 | 600 Hz | Maier-Hein (2005), Schultz (2010), Wand (2014), Wand & Schmidhuber (2016) |
 | 250 Hz | Kapur (2018), Jain (2025) |
 | 1000 Hz（→800 Hz）| Gaddy (2021) |
-| 1000 Hz | Wang (2020), Ye (2020), Xie (2025), Yang (2022)★EEG |
+| 1000 Hz | Wang (2020), Ye (2020), Xie (2025), Yang (2022)★EEG, Liu (2026) |
 | 2000 Hz | Li (2022), Li (2023) |
 | 未明（高）| Meltzner (2018) |
 
@@ -110,6 +111,8 @@
 | 6 | Wang (2020) |
 | 7 | Kapur (2018) |
 | 8 | Meltzner (2018), Jain (2025), Xie (2025), Gaddy (2021) |
+| 16（從 32 選出）| Liu (2026) |
+| 32 原始 | Liu (2026) |
 | 64★EEG | Yang (2022) |
 
 ### 5.3 說話模式
@@ -139,4 +142,5 @@
 | Li et al. (2023) | 普通話 | sEMG→語音（跨說話者）| 句子（AISHELL3）| 10.69% CER（ASR）/ 5.31%（人工）|
 | Gaddy & Klein (2021) | 英語 | sEMG→語音 | open vocabulary（19 hr）| 42.2% WER（自動）/ 32.3%（人工）|
 | Graves & Jaitly (2014) ★ASR | 英語 | 音訊→文字（非 sEMG）| open vocabulary（WSJ 81 hr）| 8.2% WER（trigram LM）|
+| Liu et al. (2026) | 普通話 | sEMG→語音 | 句子（自製 6 受試者）| **10.19% CER**（稀疏 16 ch）/ 11.61%（乾淨條件）|
 | Yang et al. (2022) ★EEG | 普通話 | EEG→聲調分類 | 有聲調 vs 無聲調（二元）| 98.82% Acc（跨受試者）|
