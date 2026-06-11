@@ -110,6 +110,7 @@
     "A Wearable Human–Machine-Interface (HMI) System Based on Colocated EMG-pFMG Sensing for Hand Gesture Recognition",
     "Cross-modal latent alignment enables efficient compression of wearable sEMG and accelerometer signals",
     "A 1000-hour EEG-EMG-audio dataset of Japanese speech production",
-    "MyoSem: Aligning Electromyography to Natural-Language Action Semantics for Hand Action Understanding"
+    "MyoSem: Aligning Electromyography to Natural-Language Action Semantics for Hand Action Understanding",
+    "Soft Active Electromyography Interface for Machine Learning‐Enabled Silent Speech Recognition"
   ]
 }
