@@ -2,7 +2,7 @@
 
 **排序：** 依論文節次（1.2.1 → 1.2.2 → 1.2.3 → 1.2.4），節次內依年代排序  
 **評估指標：** WER = 詞語錯誤率；CER = 字元錯誤率；Acc = 分類準確率  
-**更新日期：** 2026-06-11（加入 Wand 2013、Zhu 2021、Salomons 2025；按節次重新分段）
+**更新日期：** 2026-06-11（加入 Jou 2006）
 
 ---
 
@@ -22,6 +22,7 @@
 | Chan et al. (2001a) | 首次以小波特徵搭配 LDA 驗證 sEMG 語音辨識可行性 | 4 通道 sEMG 以小波多分辨率特徵 + LDA + 近鄰分類，10 個英文命令詞任務誤差 2.68%–10.36% | 未明 | 商用 EMG 放大器 | 4 | 頰部、口輪匝肌、頦肌（臉部臉頰側）| 小波分解 | LDA + 近鄰分類器 | 10 英文詞，誤差 2.68%–10.36%（session-dependent）|
 | Chan et al. (2001b) | 引入 HMM 建模 EMG 時序，解決 LDA 對時間錯位敏感問題 | 4 通道 EMG 以 AR 係數為特徵，HMM 建模時間序列，奠定傳統 sEMG 語音辨識基本框架 | 未明 | 同 Chan (2001a) | 4 | 同 Chan (2001a) | AR 係數 | HMM | 10 個英文詞，準確率較 2001a 改善（具體數值未明）|
 | Maier-Hein et al. (2005) | 首次量化電極重放（session-independent）問題 | 5 通道 EMG-UKA + TD5 + LDA + GMM-HMM，session-dependent 97.3% vs session-independent 76.2% | 600 Hz | EMG-UKA（KIT Schultz 組）| 5（實際 4）| levator anguli oris, zygomaticus major, platysma, depressor anguli oris, anterior belly of digastric | TD5 特徵 + LDA 降維 | GMM-HMM | session-dep 97.3%，session-indep 76.2%（英語）|
+| Jou et al. (2006) | 首個連續 EMG 語音辨識系統；提出 TD 時域特徵 f₂；最早記錄 OBO（口輪匝肌）因訊號不穩排除 | CMU/KIT 組：6 通道（EMG5 OBO 因訊號不穩排除，實用 5 通道），HMM + trigram LM，108 詞連續有聲英語，WER 32.0%；EMG 比聲音早 ~50 ms（預期效應）| 600 Hz | 自製（CMU/KIT）| 6（→5 使用，EMG5 OBO 排除）| ABD+tongue（單極）, LAO（雙極）, ZYG（單極）, PLT（單極）, tongue（雙極）| TD f₂ = [w̄, Pw, Pr, z, r̄] + 上下文堆疊 ±5 幀 + 50 ms delay | Context-independent HMM + trigram Broadcast News LM | 108 詞，**WER 32.0%**（E4 特徵）；有聲語音（非默語）|
 | Schultz (2010) | 擴展至 101 詞連續 sEMG 語音辨識，明確三大限制 | 5 通道 EMG-UKA，TD + GMM-HMM + BDPF，101 詞連續無聲語音，WER 31.5% | 600 Hz | EMG-UKA（KIT）| 5 | levator anguli oris, zygomaticus major, platysma, depressor anguli oris, anterior digastric | TD features + LDA | GMM-HMM + BDPF（三元語法 LM）| 101 詞連續，WER 31.5% |
 | Wand et al. (2014) | 系統量化有聲/無聲/弱聲三種說話模式的 EMG 訊號差異 | 5 通道 EMG-UKA，BDPF HMM + 頻譜映射，無聲 mime 34.7% WER | 600 Hz | EMG-UKA（KIT）| 5 | levator anguli oris, zygomaticus major, platysma, depressor anguli oris, anterior digastric | TD10 特徵 + LDA + 頻譜映射 | BDPF HMM | 無聲 mime 34.7% WER；頻譜映射補償後 36.5% |
 | Meltzner et al. (2018) | 傳統架構最大規模：自製 8 通道可穿戴感測器 + 2200 詞連續語音 | 8 通道（從 11 精簡）可穿戴感測器 + 傳統 ASR，2200 詞連續語音 WER 8.9% | 未明 | 自製可穿戴貼片感測器 | 8（從 11 選出）| 口輪匝肌、頰肌、喉部前方、舌骨、頦部等（臉頸部 8 位置）| 傳統 sEMG 前處理 | 多流 GMM-HMM | 2200 詞連續，WER 8.9% |
@@ -92,8 +93,8 @@
 
 | 節次 | 主要論文 | 跨節引用 |
 |------|---------|---------|
-| **1.2.1** | Netsell (1974), Sugie (1985), Chan (2001a/b), Maier-Hein (2005), Schultz (2010), Wand (2014), Meltzner (2018), Wand & Schmidhuber (2016), Kapur (2018), Ye (2020), Wang (2020), Gaddy (2021), Jain (2025), Xie (2025) | — |
-| **1.2.2** | Wand (2013), Zhu (2021), Salomons (2025) | Chen (2023), Song (2023), Liu (2026)（通道數/電極陣列相關）|
+| **1.2.1** | Netsell (1974), Sugie (1985), Chan (2001a/b), Maier-Hein (2005), Jou (2006), Schultz (2010), Wand (2014), Meltzner (2018), Wand & Schmidhuber (2016), Kapur (2018), Ye (2020), Wang (2020), Gaddy (2021), Jain (2025), Xie (2025) | — |
+| **1.2.2** | Wand (2013), Zhu (2021), Salomons (2025) | Chen (2023), Song (2023), Liu (2026)（通道數/電極陣列相關）；Jou (2006)（KIT 標準 5 肌群配置、OBO 最早排除記錄）|
 | **1.2.3** | Chen (2023), Song (2023), Li (2022), Yang (2022) ★EEG | Ye (2020), Wang (2020), Xie (2025)（中文任務）|
 | **1.2.4** | Graves (2006), Graves & Jaitly (2014) | Chen (2023)（CTC），Gaddy (2021)（音素輔助），Liu (2026)（稀疏選擇）|
 
@@ -102,7 +103,7 @@
 | 採樣率 | 論文 |
 |--------|------|
 | 未明 / 低（1970–1990s）| Netsell (1974), Sugie (1985), Chan (2001a/b) |
-| 600 Hz | Maier-Hein (2005), Schultz (2010), Wand (2014), Wand & Schmidhuber (2016) |
+| 600 Hz | Maier-Hein (2005), Jou (2006), Schultz (2010), Wand (2014), Wand & Schmidhuber (2016) |
 | 250 Hz | Kapur (2018), Jain (2025) |
 | 1000 Hz（→800 Hz）| Gaddy (2021) |
 | 1000 Hz | Wang (2020), Ye (2020), Xie (2025), Liu (2026), Chen (2023), Song (2023), Yang (2022)★EEG |
@@ -116,7 +117,7 @@
 |--------|------|
 | 3 | Sugie (1985) |
 | 4 | Chan (2001a/b), Ye (2020) |
-| 5 | Maier-Hein (2005), Schultz (2010), Wand (2014), Wand & Schmidhuber (2016), Li (2022), Li (2023) |
+| 5（Jou 實用 5，原始 6）| Maier-Hein (2005), Jou (2006)（6 ch，EMG5 OBO 排除後實用 5）, Schultz (2010), Wand (2014), Wand & Schmidhuber (2016), Li (2022), Li (2023) |
 | 6 | Wang (2020) |
 | 7 | Kapur (2018) |
 | 8 | Meltzner (2018), Jain (2025), Xie (2025), Gaddy (2021), **Salomons (2025)（最終配置）** |
@@ -133,7 +134,7 @@
 
 | 模式 | 論文 |
 |------|------|
-| 有聲語音（audible）| Wand (2013)（任務為有聲語音，注意！）；Li (2022/2023)（配對訓練用）|
+| 有聲語音（audible）| Jou (2006)（有聲，注意！）；Wand (2013)（任務為有聲語音，注意！）；Li (2022/2023)（配對訓練用）|
 | mime speech（無聲嘴部動作）| Maier-Hein (2005), Schultz (2010), Wand (2014), Meltzner (2018), Ye (2020), Jain (2025), Xie (2025), Li (2022/2023) 主說話者, Chen (2023), Song (2023), Zhu (2021), Salomons (2025) |
 | 內部發聲（無嘴部動作）| Kapur (2018) |
 | 想像說話（無任何動作）| Wang (2020) |
@@ -144,6 +145,7 @@
 | 論文 | 語言 | 任務類型 | 任務規模 | 最佳結果 |
 |------|------|---------|---------|---------|
 | Maier-Hein (2005) | 英語 | sEMG→文字 | 孤立詞 | 97.3% Acc（session-dep）/ 76.2%（session-indep）|
+| Jou et al. (2006) | 英語 | sEMG→文字（有聲）| 108 詞連續 | WER 32.0%（TD f₂ + E4）|
 | Schultz (2010) | 英語 | sEMG→文字 | 101 詞連續 | 31.5% WER |
 | Meltzner (2018) | 英語 | sEMG→文字 | 2200 詞連續 | 8.9% WER |
 | Wand & Schmidhuber (2016) | 英語 | sEMG→文字 | 108 詞連續 | 20.0% WER（開發集）|
